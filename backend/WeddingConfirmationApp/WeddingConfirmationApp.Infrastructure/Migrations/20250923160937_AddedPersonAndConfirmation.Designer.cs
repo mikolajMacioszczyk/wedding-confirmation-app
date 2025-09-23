@@ -12,7 +12,7 @@ using WeddingConfirmationApp.Infrastructure;
 namespace WeddingConfirmationApp.Infrastructure.Migrations
 {
     [DbContext(typeof(WeddingDbContext))]
-    [Migration("20250923160502_AddedPersonAndConfirmation")]
+    [Migration("20250923160937_AddedPersonAndConfirmation")]
     partial class AddedPersonAndConfirmation
     {
         /// <inheritdoc />
@@ -53,7 +53,7 @@ namespace WeddingConfirmationApp.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("InvitationId")
+                    b.Property<Guid?>("InvitationId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("LastName")
@@ -96,13 +96,9 @@ namespace WeddingConfirmationApp.Infrastructure.Migrations
 
             modelBuilder.Entity("WeddingConfirmationApp.Domain.Models.Person", b =>
                 {
-                    b.HasOne("WeddingConfirmationApp.Domain.Models.Invitation", "Invitation")
+                    b.HasOne("WeddingConfirmationApp.Domain.Models.Invitation", null)
                         .WithMany("Persons")
-                        .HasForeignKey("InvitationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Invitation");
+                        .HasForeignKey("InvitationId");
                 });
 
             modelBuilder.Entity("WeddingConfirmationApp.Domain.Models.PersonConfirmation", b =>

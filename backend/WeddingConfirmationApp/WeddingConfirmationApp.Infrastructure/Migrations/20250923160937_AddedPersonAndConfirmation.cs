@@ -25,7 +25,7 @@ namespace WeddingConfirmationApp.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     FirstName = table.Column<string>(type: "text", nullable: false),
                     LastName = table.Column<string>(type: "text", nullable: false),
-                    InvitationId = table.Column<Guid>(type: "uuid", nullable: false)
+                    InvitationId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -34,8 +34,7 @@ namespace WeddingConfirmationApp.Infrastructure.Migrations
                         name: "FK_Persons_Invitations_InvitationId",
                         column: x => x.InvitationId,
                         principalTable: "Invitations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
