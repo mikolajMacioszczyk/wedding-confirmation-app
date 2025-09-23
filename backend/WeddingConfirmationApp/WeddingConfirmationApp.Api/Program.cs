@@ -1,6 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using WeddingConfirmationApp.Api;
 using WeddingConfirmationApp.Infrastructure;
+using WeddingConfirmationApp.Application.Contracts;
+using WeddingConfirmationApp.Infrastructure.Repositories;
+using MediatR;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +18,14 @@ builder.Services.AddSwaggerGen();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<WeddingDbContext>(options =>
     options.UseNpgsql(connectionString));
+
+// Register MediatR
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(
+    Assembly.GetExecutingAssembly(),
+    typeof(WeddingConfirmationApp.Application.Handlers.CreatePersonCommandHandler).Assembly));
+
+// Register repositories
+builder.Services.AddScoped<IPersonRepository, PersonRepository>();
 
 builder.Services.AddHostedService<DatabaseMigrator>();
 
