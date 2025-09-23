@@ -9,6 +9,8 @@ using WeddingConfirmationApp.Application.Scopes.Persons.Queries.GetPersonById;
 
 namespace WeddingConfirmationApp.Api.Controllers;
 
+// TODO: Use result
+// TODO: Unit of work
 [ApiController]
 [Route("api/[controller]")]
 public class PersonsController : ControllerBase
