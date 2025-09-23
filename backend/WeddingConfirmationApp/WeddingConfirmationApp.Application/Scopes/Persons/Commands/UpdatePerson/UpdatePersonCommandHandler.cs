@@ -1,10 +1,9 @@
 using MediatR;
-using WeddingConfirmationApp.Application.Commands;
-using WeddingConfirmationApp.Application.Contracts;
-using WeddingConfirmationApp.Application.DTOs;
+using WeddingConfirmationApp.Application.Scopes.Persons.Contracts;
+using WeddingConfirmationApp.Application.Scopes.Persons.DTOs;
 using WeddingConfirmationApp.Domain.Models;
 
-namespace WeddingConfirmationApp.Application.Handlers;
+namespace WeddingConfirmationApp.Application.Scopes.Persons.Commands.UpdatePerson;
 
 public class UpdatePersonCommandHandler : IRequestHandler<UpdatePersonCommand, PersonDto>
 {

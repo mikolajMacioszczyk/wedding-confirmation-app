@@ -1,9 +1,8 @@
 using MediatR;
-using WeddingConfirmationApp.Application.Contracts;
-using WeddingConfirmationApp.Application.DTOs;
-using WeddingConfirmationApp.Application.Queries;
+using WeddingConfirmationApp.Application.Scopes.Persons.Contracts;
+using WeddingConfirmationApp.Application.Scopes.Persons.DTOs;
 
-namespace WeddingConfirmationApp.Application.Handlers;
+namespace WeddingConfirmationApp.Application.Scopes.Persons.Queries.GetAllPersons;
 
 public class GetAllPersonsQueryHandler : IRequestHandler<GetAllPersonsQuery, IEnumerable<PersonDto>>
 {

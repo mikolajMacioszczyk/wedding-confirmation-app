@@ -1,6 +1,6 @@
 using MediatR;
 
-namespace WeddingConfirmationApp.Application.Commands;
+namespace WeddingConfirmationApp.Application.Scopes.Persons.Commands.DeletePerson;
 
 public class DeletePersonCommand : IRequest
 {

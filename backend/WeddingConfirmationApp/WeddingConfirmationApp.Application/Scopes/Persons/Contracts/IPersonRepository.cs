@@ -1,6 +1,6 @@
 using WeddingConfirmationApp.Domain.Models;
 
-namespace WeddingConfirmationApp.Application.Contracts;
+namespace WeddingConfirmationApp.Application.Scopes.Persons.Contracts;
 
 public interface IPersonRepository
 {

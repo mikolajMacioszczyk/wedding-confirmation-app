@@ -1,8 +1,11 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using WeddingConfirmationApp.Application.Commands;
-using WeddingConfirmationApp.Application.DTOs;
-using WeddingConfirmationApp.Application.Queries;
+using WeddingConfirmationApp.Application.Scopes.Persons.Commands.CreatePerson;
+using WeddingConfirmationApp.Application.Scopes.Persons.Commands.DeletePerson;
+using WeddingConfirmationApp.Application.Scopes.Persons.Commands.UpdatePerson;
+using WeddingConfirmationApp.Application.Scopes.Persons.DTOs;
+using WeddingConfirmationApp.Application.Scopes.Persons.Queries.GetAllPersons;
+using WeddingConfirmationApp.Application.Scopes.Persons.Queries.GetPersonById;
 
 namespace WeddingConfirmationApp.Api.Controllers;
 
@@ -25,10 +28,9 @@ public class PersonsController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<PersonDto>> GetById(Guid id)
+    [HttpGet("{Id}")]
+    public async Task<ActionResult<PersonDto>> GetById([FromRoute] GetPersonByIdQuery query)
     {
-        var query = new GetPersonByIdQuery { Id = id };
         var result = await _mediator.Send(query);
         
         if (result == null)
@@ -38,28 +40,15 @@ public class PersonsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<PersonDto>> Create(CreatePersonDto createPersonDto)
+    public async Task<ActionResult<PersonDto>> Create([FromBody] CreatePersonCommand command)
     {
-        var command = new CreatePersonCommand
-        {
-            FirstName = createPersonDto.FirstName,
-            LastName = createPersonDto.LastName
-        };
-        
         var result = await _mediator.Send(command);
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
-    [HttpPut("{id}")]
-    public async Task<ActionResult<PersonDto>> Update(Guid id, UpdatePersonDto updatePersonDto)
+    [HttpPut]
+    public async Task<ActionResult<PersonDto>> Update([FromBody] UpdatePersonCommand command)
     {
-        var command = new UpdatePersonCommand
-        {
-            Id = id,
-            FirstName = updatePersonDto.FirstName,
-            LastName = updatePersonDto.LastName
-        };
-
         try
         {
             var result = await _mediator.Send(command);
@@ -71,10 +60,9 @@ public class PersonsController : ControllerBase
         }
     }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(Guid id)
+    [HttpDelete("{Id}")]
+    public async Task<IActionResult> Delete([FromRoute] DeletePersonCommand command)
     {
-        var command = new DeletePersonCommand { Id = id };
         await _mediator.Send(command);
         return NoContent();
     }

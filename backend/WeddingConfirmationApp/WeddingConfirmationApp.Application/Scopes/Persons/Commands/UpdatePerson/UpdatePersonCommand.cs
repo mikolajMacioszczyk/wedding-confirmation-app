@@ -1,7 +1,7 @@
 using MediatR;
-using WeddingConfirmationApp.Application.DTOs;
+using WeddingConfirmationApp.Application.Scopes.Persons.DTOs;
 
-namespace WeddingConfirmationApp.Application.Commands;
+namespace WeddingConfirmationApp.Application.Scopes.Persons.Commands.UpdatePerson;
 
 public class UpdatePersonCommand : IRequest<PersonDto>
 {

@@ -1,8 +1,7 @@
 using MediatR;
-using WeddingConfirmationApp.Application.Commands;
-using WeddingConfirmationApp.Application.Contracts;
+using WeddingConfirmationApp.Application.Scopes.Persons.Contracts;
 
-namespace WeddingConfirmationApp.Application.Handlers;
+namespace WeddingConfirmationApp.Application.Scopes.Persons.Commands.DeletePerson;
 
 public class DeletePersonCommandHandler : IRequestHandler<DeletePersonCommand>
 {
