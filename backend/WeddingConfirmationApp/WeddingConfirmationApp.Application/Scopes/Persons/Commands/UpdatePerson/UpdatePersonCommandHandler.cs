@@ -1,3 +1,4 @@
+using AutoMapper;
 using MediatR;
 using WeddingConfirmationApp.Application.Models;
 using WeddingConfirmationApp.Application.Scopes.Persons.Contracts;
@@ -8,10 +9,12 @@ namespace WeddingConfirmationApp.Application.Scopes.Persons.Commands.UpdatePerso
 public class UpdatePersonCommandHandler : IRequestHandler<UpdatePersonCommand, Result<PersonDto>>
 {
     private readonly IPersonRepository _personRepository;
+    private readonly IMapper _mapper;
 
-    public UpdatePersonCommandHandler(IPersonRepository personRepository)
+    public UpdatePersonCommandHandler(IPersonRepository personRepository, IMapper mapper)
     {
         _personRepository = personRepository;
+        _mapper = mapper;
     }
 
     public async Task<Result<PersonDto>> Handle(UpdatePersonCommand request, CancellationToken cancellationToken)
@@ -22,16 +25,10 @@ public class UpdatePersonCommandHandler : IRequestHandler<UpdatePersonCommand, R
             return new NotFound(request.Id);
         }
 
-        existingPerson.FirstName = request.FirstName;
-        existingPerson.LastName = request.LastName;
+        _mapper.Map(request, existingPerson);
 
         var updatedPerson = await _personRepository.UpdateAsync(existingPerson);
 
-        return new PersonDto
-        {
-            Id = updatedPerson.Id,
-            FirstName = updatedPerson.FirstName,
-            LastName = updatedPerson.LastName
-        };
+        return _mapper.Map<PersonDto>(updatedPerson);
     }
 }

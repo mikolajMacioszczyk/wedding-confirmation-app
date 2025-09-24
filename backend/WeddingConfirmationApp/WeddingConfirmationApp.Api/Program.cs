@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using WeddingConfirmationApp.Api;
 using WeddingConfirmationApp.Infrastructure;
+using WeddingConfirmationApp.Application.Scopes.Persons.Mappings;
 using WeddingConfirmationApp.Infrastructure.Repositories;
 using System.Reflection;
 using WeddingConfirmationApp.Application.Scopes.Persons.Contracts;
@@ -14,6 +15,9 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Configure AutoMapper
+builder.Services.AddAutoMapper(cfg => Assembly.GetAssembly(typeof(PersonMappingProfile)));
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<WeddingDbContext>(options =>

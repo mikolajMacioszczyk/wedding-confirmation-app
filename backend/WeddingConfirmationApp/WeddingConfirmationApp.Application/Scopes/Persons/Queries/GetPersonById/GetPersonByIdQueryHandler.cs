@@ -1,3 +1,4 @@
+using AutoMapper;
 using MediatR;
 using WeddingConfirmationApp.Application.Models;
 using WeddingConfirmationApp.Application.Scopes.Persons.Contracts;
@@ -8,10 +9,12 @@ namespace WeddingConfirmationApp.Application.Scopes.Persons.Queries.GetPersonByI
 public class GetPersonByIdQueryHandler : IRequestHandler<GetPersonByIdQuery, Result<PersonDto>>
 {
     private readonly IPersonRepository _personRepository;
+    private readonly IMapper _mapper;
 
-    public GetPersonByIdQueryHandler(IPersonRepository personRepository)
+    public GetPersonByIdQueryHandler(IPersonRepository personRepository, IMapper mapper)
     {
         _personRepository = personRepository;
+        _mapper = mapper;
     }
 
     public async Task<Result<PersonDto>> Handle(GetPersonByIdQuery request, CancellationToken cancellationToken)
@@ -23,11 +26,6 @@ public class GetPersonByIdQueryHandler : IRequestHandler<GetPersonByIdQuery, Res
             return new NotFound(request.Id);
         }
 
-        return new PersonDto
-        {
-            Id = person.Id,
-            FirstName = person.FirstName,
-            LastName = person.LastName
-        };
+        return _mapper.Map<PersonDto>(person);
     }
 }
