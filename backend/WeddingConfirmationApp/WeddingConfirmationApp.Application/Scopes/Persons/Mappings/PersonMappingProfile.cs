@@ -2,7 +2,7 @@ using AutoMapper;
 using WeddingConfirmationApp.Application.Scopes.Persons.Commands.CreatePerson;
 using WeddingConfirmationApp.Application.Scopes.Persons.Commands.UpdatePerson;
 using WeddingConfirmationApp.Application.Scopes.Persons.DTOs;
-using WeddingConfirmationApp.Domain.Models;
+using WeddingConfirmationApp.Domain.Entities;
 
 namespace WeddingConfirmationApp.Application.Scopes.Persons.Mappings;
 

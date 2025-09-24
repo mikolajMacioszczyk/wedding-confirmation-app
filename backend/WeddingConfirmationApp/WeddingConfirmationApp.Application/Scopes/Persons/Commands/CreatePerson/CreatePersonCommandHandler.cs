@@ -1,20 +1,20 @@
 using AutoMapper;
 using MediatR;
+using WeddingConfirmationApp.Application.Contracts;
 using WeddingConfirmationApp.Application.Models;
-using WeddingConfirmationApp.Application.Scopes.Persons.Contracts;
 using WeddingConfirmationApp.Application.Scopes.Persons.DTOs;
-using WeddingConfirmationApp.Domain.Models;
+using WeddingConfirmationApp.Domain.Entities;
 
 namespace WeddingConfirmationApp.Application.Scopes.Persons.Commands.CreatePerson;
 
 public class CreatePersonCommandHandler : IRequestHandler<CreatePersonCommand, Result<PersonDto>>
 {
-    private readonly IPersonRepository _personRepository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public CreatePersonCommandHandler(IPersonRepository personRepository, IMapper mapper)
+    public CreatePersonCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
     {
-        _personRepository = personRepository;
+        _unitOfWork = unitOfWork;
         _mapper = mapper;
     }
 
@@ -22,7 +22,7 @@ public class CreatePersonCommandHandler : IRequestHandler<CreatePersonCommand, R
     {
         var person = _mapper.Map<Person>(request);
 
-        var createdPerson = await _personRepository.AddAsync(person);
+        var createdPerson = await _unitOfWork.PersonRepository.AddAsync(person);
 
         return _mapper.Map<PersonDto>(createdPerson);
     }

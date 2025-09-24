@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using WeddingConfirmationApp.Application.Scopes.Persons.Contracts;
-using WeddingConfirmationApp.Domain.Models;
+using WeddingConfirmationApp.Domain.Entities;
 
 namespace WeddingConfirmationApp.Infrastructure.Repositories;
 

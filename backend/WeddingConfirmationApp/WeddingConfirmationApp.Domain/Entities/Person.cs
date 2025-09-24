@@ -1,8 +1,7 @@
-﻿namespace WeddingConfirmationApp.Domain.Models;
+﻿namespace WeddingConfirmationApp.Domain.Entities;
 
-public class Person
+public class Person : BaseDomainEntity
 {
-    public Guid Id { get; set; }
     public required string FirstName { get; set; }
 
     public required string LastName { get; set; }

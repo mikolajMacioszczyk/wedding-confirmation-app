@@ -1,25 +1,25 @@
 using AutoMapper;
 using MediatR;
+using WeddingConfirmationApp.Application.Contracts;
 using WeddingConfirmationApp.Application.Models;
-using WeddingConfirmationApp.Application.Scopes.Persons.Contracts;
 using WeddingConfirmationApp.Application.Scopes.Persons.DTOs;
 
 namespace WeddingConfirmationApp.Application.Scopes.Persons.Queries.GetPersonById;
 
 public class GetPersonByIdQueryHandler : IRequestHandler<GetPersonByIdQuery, Result<PersonDto>>
 {
-    private readonly IPersonRepository _personRepository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public GetPersonByIdQueryHandler(IPersonRepository personRepository, IMapper mapper)
+    public GetPersonByIdQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
     {
-        _personRepository = personRepository;
+        _unitOfWork = unitOfWork;
         _mapper = mapper;
     }
 
     public async Task<Result<PersonDto>> Handle(GetPersonByIdQuery request, CancellationToken cancellationToken)
     {
-        var person = await _personRepository.GetByIdAsync(request.Id);
+        var person = await _unitOfWork.PersonRepository.GetByIdAsync(request.Id);
         
         if (person is null)
         {

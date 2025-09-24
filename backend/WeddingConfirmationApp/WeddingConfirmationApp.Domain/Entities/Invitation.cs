@@ -1,8 +1,7 @@
-﻿namespace WeddingConfirmationApp.Domain.Models;
+﻿namespace WeddingConfirmationApp.Domain.Entities;
 
-public class Invitation
+public class Invitation : BaseDomainEntity
 {
-    public Guid Id { get; set; }
     // non-database identifier assigned by admin
     public Guid PublicId { get; set; }
 

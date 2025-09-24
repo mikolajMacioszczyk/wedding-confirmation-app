@@ -10,7 +10,6 @@ using WeddingConfirmationApp.Application.Scopes.Persons.Queries.GetPersonById;
 
 namespace WeddingConfirmationApp.Api.Controllers;
 
-// TODO: Unit of work
 public class PersonsController : BaseApiController
 {
     public PersonsController(IMediator mediator) : base(mediator)

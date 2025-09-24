@@ -1,4 +1,4 @@
-using WeddingConfirmationApp.Domain.Models;
+using WeddingConfirmationApp.Domain.Entities;
 
 namespace WeddingConfirmationApp.Application.Scopes.Persons.Contracts;
 

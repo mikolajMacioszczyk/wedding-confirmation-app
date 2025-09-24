@@ -1,21 +1,21 @@
 using MediatR;
+using WeddingConfirmationApp.Application.Contracts;
 using WeddingConfirmationApp.Application.Models;
-using WeddingConfirmationApp.Application.Scopes.Persons.Contracts;
 
 namespace WeddingConfirmationApp.Application.Scopes.Persons.Commands.DeletePerson;
 
 public class DeletePersonCommandHandler : IRequestHandler<DeletePersonCommand, Result<Empty>>
 {
-    private readonly IPersonRepository _personRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public DeletePersonCommandHandler(IPersonRepository personRepository)
+    public DeletePersonCommandHandler(IUnitOfWork unitOfWork)
     {
-        _personRepository = personRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Result<Empty>> Handle(DeletePersonCommand request, CancellationToken cancellationToken)
     {
-        var personFromDb = await _personRepository.GetByIdAsync(request.Id);
+        var personFromDb = await _unitOfWork.PersonRepository.GetByIdAsync(request.Id);
 
         if (personFromDb is null)
         {

@@ -1,11 +1,11 @@
 using Microsoft.EntityFrameworkCore;
-using WeddingConfirmationApp.Api;
-using WeddingConfirmationApp.Infrastructure;
-using WeddingConfirmationApp.Application.Scopes.Persons.Mappings;
-using WeddingConfirmationApp.Infrastructure.Repositories;
 using System.Reflection;
-using WeddingConfirmationApp.Application.Scopes.Persons.Contracts;
+using WeddingConfirmationApp.Api;
+using WeddingConfirmationApp.Application.Contracts;
 using WeddingConfirmationApp.Application.Scopes.Persons.Commands.CreatePerson;
+using WeddingConfirmationApp.Application.Scopes.Persons.Mappings;
+using WeddingConfirmationApp.Infrastructure;
+using WeddingConfirmationApp.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,7 +29,7 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(
     typeof(CreatePersonCommandHandler).Assembly));
 
 // Register repositories
-builder.Services.AddScoped<IPersonRepository, PersonRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddHostedService<DatabaseMigrator>();
 
