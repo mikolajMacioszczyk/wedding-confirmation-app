@@ -1,11 +1,11 @@
 using MediatR;
+using WeddingConfirmationApp.Application.Models;
 using WeddingConfirmationApp.Application.Scopes.Persons.Contracts;
 using WeddingConfirmationApp.Application.Scopes.Persons.DTOs;
-using WeddingConfirmationApp.Domain.Models;
 
 namespace WeddingConfirmationApp.Application.Scopes.Persons.Commands.UpdatePerson;
 
-public class UpdatePersonCommandHandler : IRequestHandler<UpdatePersonCommand, PersonDto>
+public class UpdatePersonCommandHandler : IRequestHandler<UpdatePersonCommand, Result<PersonDto>>
 {
     private readonly IPersonRepository _personRepository;
 
@@ -14,12 +14,12 @@ public class UpdatePersonCommandHandler : IRequestHandler<UpdatePersonCommand, P
         _personRepository = personRepository;
     }
 
-    public async Task<PersonDto> Handle(UpdatePersonCommand request, CancellationToken cancellationToken)
+    public async Task<Result<PersonDto>> Handle(UpdatePersonCommand request, CancellationToken cancellationToken)
     {
         var existingPerson = await _personRepository.GetByIdAsync(request.Id);
         if (existingPerson == null)
         {
-            throw new ArgumentException($"Person with id {request.Id} not found");
+            return new NotFound(request.Id);
         }
 
         existingPerson.FirstName = request.FirstName;

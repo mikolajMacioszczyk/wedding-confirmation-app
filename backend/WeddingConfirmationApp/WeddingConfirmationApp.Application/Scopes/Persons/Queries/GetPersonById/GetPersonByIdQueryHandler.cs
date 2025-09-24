@@ -1,10 +1,11 @@
 using MediatR;
+using WeddingConfirmationApp.Application.Models;
 using WeddingConfirmationApp.Application.Scopes.Persons.Contracts;
 using WeddingConfirmationApp.Application.Scopes.Persons.DTOs;
 
 namespace WeddingConfirmationApp.Application.Scopes.Persons.Queries.GetPersonById;
 
-public class GetPersonByIdQueryHandler : IRequestHandler<GetPersonByIdQuery, PersonDto?>
+public class GetPersonByIdQueryHandler : IRequestHandler<GetPersonByIdQuery, Result<PersonDto>>
 {
     private readonly IPersonRepository _personRepository;
 
@@ -13,12 +14,14 @@ public class GetPersonByIdQueryHandler : IRequestHandler<GetPersonByIdQuery, Per
         _personRepository = personRepository;
     }
 
-    public async Task<PersonDto?> Handle(GetPersonByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PersonDto>> Handle(GetPersonByIdQuery request, CancellationToken cancellationToken)
     {
         var person = await _personRepository.GetByIdAsync(request.Id);
         
-        if (person == null)
-            return null;
+        if (person is null)
+        {
+            return new NotFound(request.Id);
+        }
 
         return new PersonDto
         {

@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using WeddingConfirmationApp.Application.Models;
 using WeddingConfirmationApp.Application.Scopes.Persons.Commands.CreatePerson;
 using WeddingConfirmationApp.Application.Scopes.Persons.Commands.DeletePerson;
 using WeddingConfirmationApp.Application.Scopes.Persons.Commands.UpdatePerson;
@@ -9,63 +10,28 @@ using WeddingConfirmationApp.Application.Scopes.Persons.Queries.GetPersonById;
 
 namespace WeddingConfirmationApp.Api.Controllers;
 
-// TODO: Use result
 // TODO: Unit of work
-[ApiController]
-[Route("api/[controller]")]
-public class PersonsController : ControllerBase
+// TODO: Use AutoMapper
+public class PersonsController : BaseApiController
 {
-    private readonly IMediator _mediator;
-
-    public PersonsController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    public PersonsController(IMediator mediator) : base(mediator)
+    {}
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<PersonDto>>> GetAll()
     {
-        var query = new GetAllPersonsQuery();
-        var result = await _mediator.Send(query);
-        return Ok(result);
+        return Ok(await _mediator.Send(new GetAllPersonsQuery()));
     }
 
     [HttpGet("{Id}")]
-    public async Task<ActionResult<PersonDto>> GetById([FromRoute] GetPersonByIdQuery query)
-    {
-        var result = await _mediator.Send(query);
-        
-        if (result == null)
-            return NotFound();
-            
-        return Ok(result);
-    }
+    public Task<ActionResult<PersonDto>> GetById([FromRoute] GetPersonByIdQuery query) => HandleRequest(query);
 
     [HttpPost]
-    public async Task<ActionResult<PersonDto>> Create([FromBody] CreatePersonCommand command)
-    {
-        var result = await _mediator.Send(command);
-        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
-    }
+    public Task<ActionResult<PersonDto>> Create([FromBody] CreatePersonCommand command) => HandleRequest(command);
 
     [HttpPut]
-    public async Task<ActionResult<PersonDto>> Update([FromBody] UpdatePersonCommand command)
-    {
-        try
-        {
-            var result = await _mediator.Send(command);
-            return Ok(result);
-        }
-        catch (ArgumentException)
-        {
-            return NotFound();
-        }
-    }
+    public Task<ActionResult<PersonDto>> Update([FromBody] UpdatePersonCommand command) => HandleRequest(command);
 
     [HttpDelete("{Id}")]
-    public async Task<IActionResult> Delete([FromRoute] DeletePersonCommand command)
-    {
-        await _mediator.Send(command);
-        return NoContent();
-    }
+    public Task<ActionResult<Empty>> Delete([FromRoute] DeletePersonCommand command) => HandleRequest(command);
 }

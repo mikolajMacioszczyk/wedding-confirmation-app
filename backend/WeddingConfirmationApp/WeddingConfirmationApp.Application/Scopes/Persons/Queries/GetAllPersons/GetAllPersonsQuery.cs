@@ -3,6 +3,4 @@ using WeddingConfirmationApp.Application.Scopes.Persons.DTOs;
 
 namespace WeddingConfirmationApp.Application.Scopes.Persons.Queries.GetAllPersons;
 
-public class GetAllPersonsQuery : IRequest<IEnumerable<PersonDto>>
-{
-}
+public record GetAllPersonsQuery : IRequest<IEnumerable<PersonDto>>;

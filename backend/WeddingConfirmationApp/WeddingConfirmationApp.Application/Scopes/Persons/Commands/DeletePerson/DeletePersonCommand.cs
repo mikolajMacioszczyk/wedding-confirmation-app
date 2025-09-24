@@ -1,8 +1,6 @@
 using MediatR;
+using WeddingConfirmationApp.Application.Models;
 
 namespace WeddingConfirmationApp.Application.Scopes.Persons.Commands.DeletePerson;
 
-public class DeletePersonCommand : IRequest
-{
-    public Guid Id { get; set; }
-}
+public record DeletePersonCommand(Guid Id) : IRequest<Result<Empty>>;
