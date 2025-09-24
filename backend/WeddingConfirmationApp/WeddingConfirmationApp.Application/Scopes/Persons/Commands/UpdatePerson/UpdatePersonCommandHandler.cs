@@ -29,6 +29,8 @@ public class UpdatePersonCommandHandler : IRequestHandler<UpdatePersonCommand, R
 
         var updatedPerson = await _unitOfWork.PersonRepository.UpdateAsync(existingPerson);
 
+        await _unitOfWork.SaveChangesAsync();
+
         return _mapper.Map<PersonDto>(updatedPerson);
     }
 }

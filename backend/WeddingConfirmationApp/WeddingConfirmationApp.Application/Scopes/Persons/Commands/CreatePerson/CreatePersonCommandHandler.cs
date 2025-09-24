@@ -24,6 +24,8 @@ public class CreatePersonCommandHandler : IRequestHandler<CreatePersonCommand, R
 
         var createdPerson = await _unitOfWork.PersonRepository.AddAsync(person);
 
+        await _unitOfWork.SaveChangesAsync();
+
         return _mapper.Map<PersonDto>(createdPerson);
     }
 }

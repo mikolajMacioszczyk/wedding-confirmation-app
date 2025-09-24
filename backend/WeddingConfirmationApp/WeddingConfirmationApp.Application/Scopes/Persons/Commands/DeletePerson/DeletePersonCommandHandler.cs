@@ -22,6 +22,10 @@ public class DeletePersonCommandHandler : IRequestHandler<DeletePersonCommand, R
             return new NotFound(request.Id);
         }
 
+        await _unitOfWork.PersonRepository.DeleteAsync(personFromDb);
+
+        await _unitOfWork.SaveChangesAsync();
+
         return Empty.Single;
     }
 }

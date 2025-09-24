@@ -17,7 +17,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Configure AutoMapper
-builder.Services.AddAutoMapper(cfg => Assembly.GetAssembly(typeof(PersonMappingProfile)));
+builder.Services.AddAutoMapper(cfg => cfg.AddProfile<PersonMappingProfile>());
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<WeddingDbContext>(options =>

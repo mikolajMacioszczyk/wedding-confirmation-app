@@ -23,28 +23,22 @@ public class PersonRepository : IPersonRepository
         return await _context.Persons.FindAsync(id);
     }
 
-    public async Task<Person> AddAsync(Person person)
+    public Task<Person> AddAsync(Person person)
     {
         person.Id = Guid.NewGuid();
         _context.Persons.Add(person);
-        await _context.SaveChangesAsync();
-        return person;
+        return Task.FromResult(person);
     }
 
-    public async Task<Person> UpdateAsync(Person person)
+    public Task<Person> UpdateAsync(Person person)
     {
         _context.Entry(person).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
-        return person;
+        return Task.FromResult(person);
     }
 
-    public async Task DeleteAsync(Guid id)
+    public Task DeleteAsync(Person person)
     {
-        var person = await _context.Persons.FindAsync(id);
-        if (person != null)
-        {
-            _context.Persons.Remove(person);
-            await _context.SaveChangesAsync();
-        }
+        _context.Persons.Remove(person);
+        return Task.CompletedTask;
     }
 }
