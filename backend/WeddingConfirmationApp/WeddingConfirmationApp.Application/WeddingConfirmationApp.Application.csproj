@@ -10,4 +10,9 @@
     <ProjectReference Include="..\WeddingConfirmationApp.Domain\WeddingConfirmationApp.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="13.0.0" />
+    <PackageReference Include="AutoMapper" Version="15.0.1" />
+  </ItemGroup>
+
 </Project>

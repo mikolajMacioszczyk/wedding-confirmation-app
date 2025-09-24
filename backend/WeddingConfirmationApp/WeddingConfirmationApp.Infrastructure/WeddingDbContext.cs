@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using WeddingConfirmationApp.Domain.Models;
+using WeddingConfirmationApp.Domain.Entities;
 
 namespace WeddingConfirmationApp.Infrastructure;
 
@@ -9,4 +9,8 @@ public class WeddingDbContext : DbContext
     {}
 
     public DbSet<Invitation> Invitations { get; set; }
+
+    public DbSet<Person> Persons { get; set; }
+
+    public DbSet<PersonConfirmation> PersonConfirmations { get; set; }
 }
