@@ -1,6 +1,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using WeddingConfirmationApp.Application.Scopes.Invitations.Commands.AddPersonToInvitation;
 using WeddingConfirmationApp.Application.Scopes.Invitations.Commands.CreateInvitation;
+using WeddingConfirmationApp.Application.Scopes.Invitations.Commands.RemovePersonFromInvitation;
 using WeddingConfirmationApp.Application.Scopes.Invitations.Commands.UpdateInvitation;
 using WeddingConfirmationApp.Application.Scopes.Invitations.DTOs;
 using WeddingConfirmationApp.Application.Scopes.Invitations.Queries.GetAllInvitations;
@@ -8,7 +10,6 @@ using WeddingConfirmationApp.Application.Scopes.Invitations.Queries.GetInvitatio
 
 namespace WeddingConfirmationApp.Api.Controllers;
 
-// TODO: persons
 public class InvitationsController : BaseApiController
 {
     public InvitationsController(IMediator mediator) : base(mediator)
@@ -28,4 +29,10 @@ public class InvitationsController : BaseApiController
 
     [HttpPut]
     public Task<ActionResult<InvitationDto>> Update([FromBody] UpdateInvitationCommand command) => HandleRequest(command);
+
+    [HttpPost("{InvitationId}/persons/{PersonId}")]
+    public Task<ActionResult<InvitationDto>> AddPersonToInvitation([FromRoute] AddPersonToInvitationCommand command) => HandleRequest(command);
+
+    [HttpDelete("{InvitationId}/persons/{PersonId}")]
+    public Task<ActionResult<InvitationDto>> RemovePersonFromInvitation([FromRoute] RemovePersonFromInvitationCommand command) => HandleRequest(command);
 }
