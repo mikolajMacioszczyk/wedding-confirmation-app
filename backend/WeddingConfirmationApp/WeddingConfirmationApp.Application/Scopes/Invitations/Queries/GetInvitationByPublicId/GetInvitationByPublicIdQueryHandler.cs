@@ -23,7 +23,7 @@ public class GetInvitationByPublicIdQueryHandler : IRequestHandler<GetInvitation
         
         if (invitation is null)
         {
-            return new NotFound(request.PublicId, $"Invitation with PublicId {request.PublicId} not exists");
+            return new NotFound(request.PublicId, $"Invitation with PublicId {request.PublicId} does not exist");
         }
 
         return _mapper.Map<InvitationDto>(invitation);

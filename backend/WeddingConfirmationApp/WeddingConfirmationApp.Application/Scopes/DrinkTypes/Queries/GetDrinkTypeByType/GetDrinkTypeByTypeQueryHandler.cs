@@ -23,7 +23,7 @@ public class GetDrinkTypeByTypeQueryHandler : IRequestHandler<GetDrinkTypeByType
         
         if (drinkType is null)
         {
-            return new NotFound(request.Type, $"Drink with type {request.Type} not exists");
+            return new NotFound(request.Type, $"Drink with type {request.Type} does not exist");
         }
 
         return _mapper.Map<DrinkTypeDto>(drinkType);

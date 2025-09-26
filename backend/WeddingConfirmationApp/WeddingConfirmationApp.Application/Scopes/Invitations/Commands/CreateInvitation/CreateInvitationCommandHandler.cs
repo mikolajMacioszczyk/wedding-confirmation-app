@@ -21,7 +21,7 @@ public class CreateInvitationCommandHandler : IRequestHandler<CreateInvitationCo
     public async Task<Result<InvitationDto>> Handle(CreateInvitationCommand request, CancellationToken cancellationToken)
     {
         var invitationWithTheSamePublicId = await _unitOfWork.InvitationRepository.GetByPublicIdAsync(request.PublicId);
-        if (invitationWithTheSamePublicId is null)
+        if (invitationWithTheSamePublicId is not null)
         {
             return new Failure($"Invitation with PublicId {request.PublicId} already exists");
         }
