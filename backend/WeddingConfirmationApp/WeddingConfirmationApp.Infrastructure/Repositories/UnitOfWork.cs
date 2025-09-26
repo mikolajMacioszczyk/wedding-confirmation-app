@@ -2,12 +2,14 @@
 using Microsoft.Extensions.Logging;
 using WeddingConfirmationApp.Application.Contracts;
 using WeddingConfirmationApp.Application.Scopes.Persons.Contracts;
+using WeddingConfirmationApp.Application.Scopes.Invitations.Contracts;
 using WeddingConfirmationApp.Domain.Entities;
 
 namespace WeddingConfirmationApp.Infrastructure.Repositories;
 public class UnitOfWork : IUnitOfWork
 {
     public IPersonRepository PersonRepository { get; }
+    public IInvitationRepository InvitationRepository { get; }
 
     private readonly WeddingDbContext _context;
     private readonly ILogger<UnitOfWork> _logger;
@@ -17,6 +19,7 @@ public class UnitOfWork : IUnitOfWork
         _context = context;
         _logger = logger;
         PersonRepository = new PersonRepository(context);
+        InvitationRepository = new InvitationRepository(context);
     }
 
     public async Task<(bool ChangesMade, IEnumerable<BaseDomainEntity> EntitiesWithErrors)> SaveChangesAsync(bool continueOnError = false)
