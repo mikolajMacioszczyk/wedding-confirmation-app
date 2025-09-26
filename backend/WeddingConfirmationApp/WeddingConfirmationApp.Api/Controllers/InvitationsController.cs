@@ -7,6 +7,7 @@ using WeddingConfirmationApp.Application.Scopes.Invitations.Commands.UpdateInvit
 using WeddingConfirmationApp.Application.Scopes.Invitations.DTOs;
 using WeddingConfirmationApp.Application.Scopes.Invitations.Queries.GetAllInvitations;
 using WeddingConfirmationApp.Application.Scopes.Invitations.Queries.GetInvitationById;
+using WeddingConfirmationApp.Application.Scopes.Invitations.Queries.GetInvitationByPublicId;
 
 namespace WeddingConfirmationApp.Api.Controllers;
 
@@ -23,6 +24,9 @@ public class InvitationsController : BaseApiController
 
     [HttpGet("{Id}")]
     public Task<ActionResult<InvitationDto>> GetById([FromRoute] GetInvitationByIdQuery query) => HandleRequest(query);
+
+    [HttpGet("by-public-id/{PublicId}")]
+    public Task<ActionResult<InvitationDto>> GetByPublicId([FromRoute] GetInvitationByPublicIdQuery query) => HandleRequest(query);
 
     [HttpPost]
     public Task<ActionResult<InvitationDto>> Create([FromBody] CreateInvitationCommand command) => HandleRequest(command);
