@@ -3,7 +3,7 @@
 public class Invitation : BaseDomainEntity
 {
     // non-database identifier assigned by admin
-    public Guid PublicId { get; set; }
+    public required string PublicId { get; set; }
 
     public required string InvitationText { get; set; }
 

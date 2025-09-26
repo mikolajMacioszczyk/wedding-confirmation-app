@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WeddingConfirmationApp.Infrastructure;
@@ -11,9 +12,11 @@ using WeddingConfirmationApp.Infrastructure;
 namespace WeddingConfirmationApp.Infrastructure.Migrations
 {
     [DbContext(typeof(WeddingDbContext))]
-    partial class WeddingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250926160813_ChangePublicIdToString")]
+    partial class ChangePublicIdToString
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -86,7 +89,7 @@ namespace WeddingConfirmationApp.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<bool>("Confirmed")
+                    b.Property<bool>("Confimed")
                         .HasColumnType("boolean");
 
                     b.Property<Guid>("InvitationId")
