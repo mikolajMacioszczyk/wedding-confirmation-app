@@ -18,9 +18,14 @@ public class InvitationRepository : IInvitationRepository
         return await _context.Invitations.ToListAsync();
     }
 
-    public async Task<Invitation?> GetByIdAsync(Guid id)
+    public Task<Invitation?> GetByIdAsync(Guid id)
     {
-        return await _context.Invitations.Include(i => i.Persons).FirstOrDefaultAsync(i => i.Id == id);
+        return _context.Invitations.Include(i => i.Persons).FirstOrDefaultAsync(i => i.Id == id);
+    }
+
+    public Task<Invitation?> GetByPublicIdAsync(string publicId)
+    {
+        return _context.Invitations.Include(i => i.Persons).FirstOrDefaultAsync(i => i.PublicId == publicId);
     }
 
     public Task<Invitation> AddAsync(Invitation invitation)
