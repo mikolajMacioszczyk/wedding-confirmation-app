@@ -18,15 +18,19 @@ public class DeleteDrinkTypeCommandHandler : IRequestHandler<DeleteDrinkTypeComm
         var drinkType = await _unitOfWork.DrinkTypeRepository.GetByIdAsync(request.Id);
         
         if (drinkType is null)
-            return new NotFound<Empty>();
-        
+        {
+            return new NotFound(request.Id);
+        }
+
         await _unitOfWork.DrinkTypeRepository.DeleteAsync(drinkType);
         
         var (changesMade, entitiesWithErrors) = await _unitOfWork.SaveChangesAsync();
         
         if (!changesMade || entitiesWithErrors.Any())
-            return new Failure<Empty>("Failed to delete drink type");
-        
-        return new Result<Empty>(new Empty());
+        {
+            return new Failure("Failed to delete drink type");
+        }
+
+        return Empty.Single;
     }
 }

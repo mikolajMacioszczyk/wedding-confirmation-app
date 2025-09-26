@@ -22,8 +22,10 @@ public class GetDrinkTypeByIdQueryHandler : IRequestHandler<GetDrinkTypeByIdQuer
         var drinkType = await _unitOfWork.DrinkTypeRepository.GetByIdAsync(request.Id);
         
         if (drinkType is null)
-            return new NotFound<DrinkTypeDto>();
-        
-        return new Result<DrinkTypeDto>(_mapper.Map<DrinkTypeDto>(drinkType));
+        {
+            return new NotFound(request.Id);
+        }
+
+        return _mapper.Map<DrinkTypeDto>(drinkType);
     }
 }

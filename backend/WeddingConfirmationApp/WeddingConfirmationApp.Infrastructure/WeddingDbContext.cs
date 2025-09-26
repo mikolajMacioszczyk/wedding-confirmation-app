@@ -13,4 +13,17 @@ public class WeddingDbContext : DbContext
     public DbSet<Person> Persons { get; set; }
 
     public DbSet<PersonConfirmation> PersonConfirmations { get; set; }
+
+    public DbSet<DrinkType> DrinkTypes { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<Invitation>()
+            .HasIndex(i => i.PublicId);
+
+        modelBuilder.Entity<DrinkType>()
+            .HasIndex(i => i.Type);
+    }
 }

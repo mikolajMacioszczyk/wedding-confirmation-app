@@ -22,8 +22,10 @@ public class UpdateDrinkTypeCommandHandler : IRequestHandler<UpdateDrinkTypeComm
         var drinkType = await _unitOfWork.DrinkTypeRepository.GetByIdAsync(request.Id);
         
         if (drinkType is null)
-            return new NotFound<DrinkTypeDto>();
-        
+        {
+            return new NotFound(request.Id);
+        }
+
         drinkType.Type = request.Type;
         
         var updatedDrinkType = await _unitOfWork.DrinkTypeRepository.UpdateAsync(drinkType);
@@ -31,8 +33,10 @@ public class UpdateDrinkTypeCommandHandler : IRequestHandler<UpdateDrinkTypeComm
         var (changesMade, entitiesWithErrors) = await _unitOfWork.SaveChangesAsync();
         
         if (!changesMade || entitiesWithErrors.Any())
-            return new Failure<DrinkTypeDto>("Failed to update drink type");
-        
-        return new Result<DrinkTypeDto>(_mapper.Map<DrinkTypeDto>(updatedDrinkType));
+        {
+            return new Failure("Failed to update drink type");
+        }
+
+        return _mapper.Map<DrinkTypeDto>(updatedDrinkType);
     }
 }
