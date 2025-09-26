@@ -26,7 +26,6 @@ public class UpdateInvitationCommandHandler : IRequestHandler<UpdateInvitationCo
             return new NotFound(request.Id);
         }
 
-        invitation.PublicId = request.PublicId;
         invitation.InvitationText = request.InvitationText;
         
         var updatedInvitation = await _unitOfWork.InvitationRepository.UpdateAsync(invitation);

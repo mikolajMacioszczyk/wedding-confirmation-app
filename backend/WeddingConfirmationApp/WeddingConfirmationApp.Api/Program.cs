@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using WeddingConfirmationApp.Api;
 using WeddingConfirmationApp.Application.Contracts;
+using WeddingConfirmationApp.Application.Scopes.Invitations.Mappings;
 using WeddingConfirmationApp.Application.Scopes.Persons.Commands.CreatePerson;
 using WeddingConfirmationApp.Application.Scopes.Persons.Mappings;
 using WeddingConfirmationApp.Infrastructure;
@@ -17,7 +19,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Configure AutoMapper
-builder.Services.AddAutoMapper(cfg => cfg.AddProfile<PersonMappingProfile>());
+builder.Services.AddAutoMapper(cfg => { }, typeof(PersonMappingProfile).Assembly);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<WeddingDbContext>(options =>
