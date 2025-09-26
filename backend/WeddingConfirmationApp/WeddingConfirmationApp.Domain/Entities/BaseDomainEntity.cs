@@ -2,5 +2,5 @@
 
 public abstract class BaseDomainEntity
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 }

@@ -25,7 +25,6 @@ public class InvitationRepository : IInvitationRepository
 
     public Task<Invitation> AddAsync(Invitation invitation)
     {
-        invitation.Id = Guid.NewGuid();
         _context.Invitations.Add(invitation);
         return Task.FromResult(invitation);
     }

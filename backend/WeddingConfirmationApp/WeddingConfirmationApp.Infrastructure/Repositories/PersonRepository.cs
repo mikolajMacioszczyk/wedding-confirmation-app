@@ -25,7 +25,6 @@ public class PersonRepository : IPersonRepository
 
     public Task<Person> AddAsync(Person person)
     {
-        person.Id = Guid.NewGuid();
         _context.Persons.Add(person);
         return Task.FromResult(person);
     }
