@@ -10,4 +10,7 @@ public class PersonConfirmation : BaseDomainEntity
 
     public bool Confimed { get; set; }
     public bool IsValid { get; set; }
+
+    public Guid SelectedDrinkId { get; set; }
+    public DrinkType SelectedDrink { get; set; } = null!;
 }
