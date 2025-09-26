@@ -20,8 +20,8 @@ public class CreateDrinkTypeCommandHandler : IRequestHandler<CreateDrinkTypeComm
 
     public async Task<Result<DrinkTypeDto>> Handle(CreateDrinkTypeCommand request, CancellationToken cancellationToken)
     {
-        var existingDrinkType = await _unitOfWork.DrinkTypeRepository.GetByTypeAsync(request.Type);
-        if (existingDrinkType is not null)
+        var drinkWithTheSameTypeType = await _unitOfWork.DrinkTypeRepository.GetByTypeAsync(request.Type);
+        if (drinkWithTheSameTypeType is not null)
         {
             return new Failure($"Drink with type {request.Type} already exists");
         }
@@ -33,8 +33,10 @@ public class CreateDrinkTypeCommandHandler : IRequestHandler<CreateDrinkTypeComm
         var (changesMade, entitiesWithErrors) = await _unitOfWork.SaveChangesAsync();
         
         if (!changesMade || entitiesWithErrors.Any())
+        {
             return new Failure("Failed to create drink type");
-        
+        }
+
         return _mapper.Map<DrinkTypeDto>(createdDrinkType);
     }
 }

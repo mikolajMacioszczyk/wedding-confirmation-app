@@ -1,6 +1,5 @@
 using AutoMapper;
 using WeddingConfirmationApp.Application.Scopes.DrinkTypes.Commands.CreateDrinkType;
-using WeddingConfirmationApp.Application.Scopes.DrinkTypes.Commands.UpdateDrinkType;
 using WeddingConfirmationApp.Application.Scopes.DrinkTypes.DTOs;
 using WeddingConfirmationApp.Domain.Entities;
 
@@ -15,6 +14,5 @@ public class DrinkTypeMappingProfile : Profile
         
         // Command to Domain mappings
         CreateMap<CreateDrinkTypeCommand, DrinkType>();
-        CreateMap<UpdateDrinkTypeCommand, DrinkType>();
     }
 }
