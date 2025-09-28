@@ -41,12 +41,8 @@ public class CreatePersonConfirmationCommandHandler : IRequestHandler<CreatePers
             return new NotFound(request.SelectedDrinkId, "Drink type not found");
         }
 
-        // TODO: Check if other not exists
+        var personConfirmation = await UpdateOrCreateNew(request, drinkType);
 
-        var personConfirmation = _mapper.Map<PersonConfirmation>(request);
-
-        var createdPersonConfirmation = await _unitOfWork.PersonConfirmationRepository.AddAsync(personConfirmation);
-        
         var (changesMade, entitiesWithErrors) = await _unitOfWork.SaveChangesAsync();
         
         if (!changesMade || entitiesWithErrors.Any())
@@ -54,6 +50,23 @@ public class CreatePersonConfirmationCommandHandler : IRequestHandler<CreatePers
             return new Failure("Failed to create person confirmation");
         }
 
-        return _mapper.Map<PersonConfirmationDto>(createdPersonConfirmation);
+        return _mapper.Map<PersonConfirmationDto>(personConfirmation);
+    }
+
+    private async Task<PersonConfirmation> UpdateOrCreateNew(CreatePersonConfirmationCommand request, DrinkType drinkType)
+    {
+        var existingConfirmation = await _unitOfWork.PersonConfirmationRepository.GetByInvitationIdAndPersonIdAsync(request.InvitationId, request.PersonId);
+
+        if (existingConfirmation is not null)
+        {
+            existingConfirmation.Confirmed = request.Confirmed;
+            existingConfirmation.SelectedDrink = drinkType;
+            return await _unitOfWork.PersonConfirmationRepository.UpdateAsync(existingConfirmation);
+        }
+        else
+        {
+            var personConfirmation = _mapper.Map<PersonConfirmation>(request);
+            return await _unitOfWork.PersonConfirmationRepository.AddAsync(personConfirmation);
+        }
     }
 }

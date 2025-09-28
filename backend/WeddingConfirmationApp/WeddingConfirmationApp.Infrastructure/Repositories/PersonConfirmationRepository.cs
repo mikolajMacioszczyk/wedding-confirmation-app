@@ -41,6 +41,15 @@ public class PersonConfirmationRepository : IPersonConfirmationRepository
             .ToListAsync();
     }
 
+    public Task<PersonConfirmation?> GetByInvitationIdAndPersonIdAsync(Guid invitationId, Guid personId)
+    {
+        return _context.PersonConfirmations
+            .Include(pc => pc.Invitation)
+            .Include(pc => pc.Person)
+            .Include(pc => pc.SelectedDrink)
+            .FirstOrDefaultAsync(pc => pc.InvitationId == invitationId && pc.PersonId == personId);
+    }
+
     public Task<PersonConfirmation> AddAsync(PersonConfirmation personConfirmation)
     {
         _context.PersonConfirmations.Add(personConfirmation);
