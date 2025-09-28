@@ -12,6 +12,7 @@ using WeddingConfirmationApp.Infrastructure.Repositories;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+const string CorsAllPolicy = "All";
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -35,7 +36,20 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddHostedService<DatabaseMigrator>();
 
+var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string>()!;
+
+builder.Services.AddCors(o => o.AddPolicy(CorsAllPolicy, corsBulder =>
+{
+    corsBulder
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials()
+        .WithOrigins(allowedOrigins.Split(","));
+}));
+
 var app = builder.Build();
+
+app.UseCors(CorsAllPolicy);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
