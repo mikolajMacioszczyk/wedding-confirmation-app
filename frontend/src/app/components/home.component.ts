@@ -9,28 +9,47 @@ import { RouterModule } from '@angular/router';
   template: `
     <div class="home-container">
       <div class="home-card">
-        <h1>Wedding Confirmation App</h1>
+        <h1>Wesele Alicji i Mikołaj</h1>
         <p>Witamy w aplikacji do potwierdzania obecności na weselu.</p>
-        <div class="instructions">
-          <h3>Jak korzystać z aplikacji:</h3>
-          <ol>
-            <li>Kliknij w link otrzymany w zaproszeniu</li>
-            <li>Lub wpisz w przeglądarce: <code>/potwierdz/[TwojIdentyfikator]</code></li>
-            <li>Wybierz osoby które potwierdzają obecność</li>
-            <li>Wybierz napoje dla każdej potwierdzonej osoby</li>
-            <li>Kliknij "Zapisz potwierdzenia"</li>
-          </ol>
-        </div>
-        <div class="example">
-          <p>Przykład: <a routerLink="/potwierdz/sample">potwierdz/sample</a></p>
+
+        <div class="qr-instructions">
+          <div class="qr-icon">📱</div>
+          <h3>Jak potwierdzić obecność:</h3>
+          <div class="steps">
+            <div class="step">
+              <div class="step-number">1</div>
+              <div class="step-content">
+                <h4>Zeskanuj kod QR</h4>
+                <p>Użyj aparatu w telefonie lub aplikacji do skanowania kodów QR z Twojego zaproszenia</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-number">2</div>
+              <div class="step-content">
+                <h4>Wybierz osoby</h4>
+                <p>Zaznacz które osoby z Twojego zaproszenia potwierdzają obecność na weselu</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-number">3</div>
+              <div class="step-content">
+                <h4>Wybierz napoje</h4>
+                <p>Dla każdej potwierdzonej osoby wybierz główny rodzaj alkoholu, który planujesz pić</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-number">4</div>
+              <div class="step-content">
+                <h4>Zapisz potwierdzenie</h4>
+                <p>Kliknij przycisk "Zapisz potwierdzenie" aby sfinalizować proces</p>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="admin-section">
-          <h3>Dla administratorów</h3>
-          <p>Zarządzaj zaproszeniami, osobami i rodzajami napojów</p>
-          <a routerLink="/admin" class="admin-link">
-            🔧 Panel administratora
-          </a>
+        <div class="help-section">
+          <p><strong>Kod QR z zaproszenia nie działa?</strong></p>
+          <p>Skontaktuj się z organizatorami wesela aby otrzymać link do potwierdzenia</p>
         </div>
       </div>
     </div>
@@ -61,83 +80,86 @@ import { RouterModule } from '@angular/router';
       font-size: 2.5em;
     }
 
-    .instructions {
-      text-align: left;
+    .qr-instructions {
       margin: 30px 0;
-      padding: 20px;
-      background: #f8f9fa;
-      border-radius: 10px;
-      border-left: 4px solid #667eea;
+      padding: 30px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 15px;
+      border: 2px solid #667eea;
     }
 
-    .instructions h3 {
+    .qr-icon {
+      font-size: 3em;
+      margin-bottom: 20px;
+    }
+
+    .qr-instructions h3 {
       color: #333;
-      margin-bottom: 15px;
+      margin-bottom: 25px;
+      font-size: 1.5em;
     }
 
-    .instructions ol {
-      color: #555;
-      line-height: 1.6;
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
 
-    .instructions li {
-      margin-bottom: 8px;
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 15px;
+      padding: 15px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     }
 
-    .instructions code {
-      background: #e9ecef;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-family: monospace;
-      color: #d73a49;
+    .step-number {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1.1em;
+      flex-shrink: 0;
     }
 
-    .example {
-      margin-top: 20px;
+    .step-content {
+      text-align: left;
     }
 
-    .example a {
-      color: #667eea;
-      text-decoration: none;
-      font-weight: 500;
+    .step-content h4 {
+      color: #333;
+      margin: 0 0 8px 0;
+      font-size: 1.1em;
     }
 
-    .example a:hover {
-      text-decoration: underline;
+    .step-content p {
+      color: #666;
+      margin: 0;
+      line-height: 1.5;
     }
 
-    .admin-section {
+    .help-section {
       margin-top: 30px;
       padding: 20px;
-      background: #e3f2fd;
+      background: #fff3cd;
       border-radius: 10px;
-      border-left: 4px solid #2196f3;
+      border-left: 4px solid #ffc107;
     }
 
-    .admin-section h3 {
+    .help-section p {
+      margin: 5px 0;
+      color: #856404;
+    }
+
+    .help-section strong {
       color: #333;
-      margin-bottom: 10px;
-    }
-
-    .admin-section p {
-      color: #555;
-      margin-bottom: 15px;
-    }
-
-    .admin-link {
-      display: inline-block;
-      background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
-      color: white;
-      padding: 12px 20px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: 600;
-      transition: all 0.3s ease;
-    }
-
-    .admin-link:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(33, 150, 243, 0.3);
     }
 
     @media (max-width: 768px) {
@@ -148,6 +170,24 @@ import { RouterModule } from '@angular/router';
 
       h1 {
         font-size: 2em;
+      }
+
+      .qr-instructions {
+        padding: 20px;
+      }
+
+      .step {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+      }
+
+      .step-content {
+        text-align: center;
+      }
+
+      .qr-icon {
+        font-size: 2.5em;
       }
     }
   `]

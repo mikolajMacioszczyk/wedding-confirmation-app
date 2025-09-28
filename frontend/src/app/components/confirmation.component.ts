@@ -59,19 +59,19 @@ interface PersonWithConfirmation {
                           name="confirmed_{{ personWithConf.person.id }}"
                         >
                         <span class="checkmark"></span>
-                        Potwierdza obecność
+                        Będę na weselu
                       </label>
 
                       @if (personWithConf.confirmed) {
                         <div class="drink-selection">
-                          <label for="drink_{{ personWithConf.person.id }}">Wybierz napój:</label>
+                          <label for="drink_{{ personWithConf.person.id }}">Jaki alkohol głównie będziesz pić?</label>
                           <select
                             [(ngModel)]="personWithConf.selectedDrinkId"
                             name="drink_{{ personWithConf.person.id }}"
                             id="drink_{{ personWithConf.person.id }}"
                             required
                           >
-                            <option value="">-- Wybierz napój --</option>
+                            <option value="">-- Wybierz alkohol --</option>
                             @for (drink of drinkTypes(); track drink.id) {
                               <option [value]="drink.id">{{ drink.type }}</option>
                             }

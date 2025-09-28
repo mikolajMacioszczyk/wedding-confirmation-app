@@ -63,7 +63,6 @@ interface ConfirmationWithDetails {
               <div class="col-invitation">Zaproszenie</div>
               <div class="col-status">Status</div>
               <div class="col-drink">Napój</div>
-              <div class="col-valid">Ważność</div>
             </div>
 
             @for (item of filteredConfirmations(); track item.confirmation.id) {
@@ -84,7 +83,7 @@ interface ConfirmationWithDetails {
 
                 <div class="col-status">
                   <span class="status-badge" [class.confirmed]="item.confirmation.confirmed">
-                    {{ item.confirmation.confirmed ? '✅ Potwierdzone' : '❌ Niepotwierdzone' }}
+                    {{ item.confirmation.confirmed ? '✅ Potwierdzone' : '❌ Odmowa' }}
                   </span>
                 </div>
 
@@ -94,12 +93,6 @@ interface ConfirmationWithDetails {
                   } @else {
                     <span class="no-drink">-</span>
                   }
-                </div>
-
-                <div class="col-valid">
-                  <span class="valid-badge" [class.valid]="item.confirmation.isValid">
-                    {{ item.confirmation.isValid ? '✓ Ważne' : '⚠️ Nieważne' }}
-                  </span>
                 </div>
               </div>
             }
