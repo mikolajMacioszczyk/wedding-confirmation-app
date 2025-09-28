@@ -9,7 +9,6 @@ public class PersonConfirmation : BaseDomainEntity
     public Person Person { get; set; } = null!;
 
     public bool Confirmed { get; set; }
-    public bool IsValid { get; set; }
 
     public Guid SelectedDrinkId { get; set; }
     public DrinkType SelectedDrink { get; set; } = null!;
