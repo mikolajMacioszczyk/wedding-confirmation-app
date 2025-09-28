@@ -41,7 +41,7 @@ public class CreatePersonConfirmationCommandHandler : IRequestHandler<CreatePers
             return new NotFound(request.SelectedDrinkId, "Drink type not found");
         }
 
-        var personConfirmation = await UpdateOrCreateNew(request, drinkType);
+        var personConfirmation = await UpdateOrCreateNew(request);
 
         var (changesMade, entitiesWithErrors) = await _unitOfWork.SaveChangesAsync();
         
@@ -53,14 +53,14 @@ public class CreatePersonConfirmationCommandHandler : IRequestHandler<CreatePers
         return _mapper.Map<PersonConfirmationDto>(personConfirmation);
     }
 
-    private async Task<PersonConfirmation> UpdateOrCreateNew(CreatePersonConfirmationCommand request, DrinkType drinkType)
+    private async Task<PersonConfirmation> UpdateOrCreateNew(CreatePersonConfirmationCommand request)
     {
         var existingConfirmation = await _unitOfWork.PersonConfirmationRepository.GetByInvitationIdAndPersonIdAsync(request.InvitationId, request.PersonId);
 
         if (existingConfirmation is not null)
         {
             existingConfirmation.Confirmed = request.Confirmed;
-            existingConfirmation.SelectedDrink = drinkType;
+            existingConfirmation.SelectedDrinkId = request.SelectedDrinkId;
             return await _unitOfWork.PersonConfirmationRepository.UpdateAsync(existingConfirmation);
         }
         else
