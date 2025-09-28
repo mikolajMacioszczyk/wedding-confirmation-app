@@ -29,6 +29,6 @@ public class PersonConfirmationsController : BaseApiController
     [HttpPost]
     public Task<ActionResult<PersonConfirmationDto>> Create([FromBody] CreatePersonConfirmationCommand command) => HandleRequest(command, isCreate: true);
 
-    [HttpPut("{Id}")]
+    [HttpPut()]
     public Task<ActionResult<PersonConfirmationDto>> Update([FromBody] UpdatePersonConfirmationCommand command) => HandleRequest(command);
 }
