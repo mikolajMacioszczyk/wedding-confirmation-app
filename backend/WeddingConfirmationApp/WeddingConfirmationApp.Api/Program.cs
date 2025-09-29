@@ -1,11 +1,16 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using System.Reflection;
+using System.Text;
 using WeddingConfirmationApp.Api;
+using WeddingConfirmationApp.Api.Extensions;
+using WeddingConfirmationApp.Application.Config;
 using WeddingConfirmationApp.Application.Contracts;
-using WeddingConfirmationApp.Application.Scopes.Invitations.Mappings;
 using WeddingConfirmationApp.Application.Scopes.Persons.Commands.CreatePerson;
 using WeddingConfirmationApp.Application.Scopes.Persons.Mappings;
+using WeddingConfirmationApp.Application.Scopes.Users.Contracts;
+using WeddingConfirmationApp.Application.Scopes.Users.Services;
 using WeddingConfirmationApp.Infrastructure;
 using WeddingConfirmationApp.Infrastructure.Repositories;
 
@@ -17,7 +22,7 @@ const string CorsAllPolicy = "All";
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGenWithAuth();
 
 // Configure AutoMapper
 builder.Services.AddAutoMapper(cfg => { }, typeof(PersonMappingProfile).Assembly);
@@ -34,7 +39,40 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(
 // Register repositories
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+// Register services
+builder.Services.Configure<JwtConfiguration>(
+    builder.Configuration.GetSection("Jwt")
+);
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+// Configure JWT Authentication
+var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new ArgumentNullException("Jwt:Key");
+var key = Encoding.UTF8.GetBytes(jwtKey);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ValidateIssuer = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? "WeddingConfirmationApp",
+        ValidateAudience = true,
+        ValidAudience = builder.Configuration["Jwt:Audience"] ?? "WeddingConfirmationApp",
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero
+    };
+});
+
+builder.Services.AddAuthorization();
+
 builder.Services.AddHostedService<DatabaseMigrator>();
+builder.Services.AddHostedService<DatabaseSeeder>();
 
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string>()!;
 
@@ -60,6 +98,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

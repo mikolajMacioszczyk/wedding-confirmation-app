@@ -16,6 +16,8 @@ public class WeddingDbContext : DbContext
 
     public DbSet<DrinkType> DrinkTypes { get; set; }
 
+    public DbSet<User> Users { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -25,5 +27,9 @@ public class WeddingDbContext : DbContext
 
         modelBuilder.Entity<DrinkType>()
             .HasIndex(i => i.Type);
+
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.Username)
+            .IsUnique();
     }
 }

@@ -87,16 +87,6 @@ server {
 }
 ```
 
-#### 3. Docker Compose (`docker-compose.yaml`)
-```yaml
-frontend:
-  ports:
-    - "80:80"      # ← For production (port 80)
-    # - "4200:80"  # ← For development
-```
-
-### How nginx Routes Requests
-
 The frontend nginx container handles both frontend and API routing:
 
 ```
@@ -104,3 +94,7 @@ Browser → nginx (port 80/443)
 ├── /api/* → Proxy to Backend (.NET API)
 └── /*     → Serve Angular App (SPA routing)
 ```
+
+### 3. Environment Variables for Production
+
+Create a `.env` file and set environment variables for production

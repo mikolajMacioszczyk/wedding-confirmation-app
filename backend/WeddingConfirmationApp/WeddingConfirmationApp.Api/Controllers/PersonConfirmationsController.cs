@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WeddingConfirmationApp.Application.Scopes.PersonConfirmations.Commands.CreatePersonConfirmation;
 using WeddingConfirmationApp.Application.Scopes.PersonConfirmations.Commands.UpdatePersonConfirmation;
@@ -9,6 +10,7 @@ using WeddingConfirmationApp.Application.Scopes.PersonConfirmations.Queries.GetP
 
 namespace WeddingConfirmationApp.Api.Controllers;
 
+[Authorize(Roles = "Administrator")]
 public class PersonConfirmationsController : BaseApiController
 {
     public PersonConfirmationsController(IMediator mediator) : base(mediator)
@@ -24,11 +26,14 @@ public class PersonConfirmationsController : BaseApiController
     public Task<ActionResult<PersonConfirmationDto>> GetById([FromRoute] GetPersonConfirmationByIdQuery query) => HandleRequest(query);
 
     [HttpGet("by-invitation/{InvitationId}")]
+    [AllowAnonymous]
     public Task<ActionResult<IEnumerable<PersonConfirmationDto>>> GetByInvitation([FromRoute] GetPersonConfirmationsByInvitationQuery query) => HandleRequest(query);
 
     [HttpPost]
+    [AllowAnonymous]
     public Task<ActionResult<PersonConfirmationDto>> Create([FromBody] CreatePersonConfirmationCommand command) => HandleRequest(command, isCreate: true);
 
     [HttpPut()]
+    [AllowAnonymous]
     public Task<ActionResult<PersonConfirmationDto>> Update([FromBody] UpdatePersonConfirmationCommand command) => HandleRequest(command);
 }

@@ -6,6 +6,7 @@ using WeddingConfirmationApp.Application.Scopes.Invitations.Contracts;
 using WeddingConfirmationApp.Application.Scopes.DrinkTypes.Contracts;
 using WeddingConfirmationApp.Application.Scopes.PersonConfirmations.Contracts;
 using WeddingConfirmationApp.Domain.Entities;
+using WeddingConfirmationApp.Application.Scopes.Users.Contracts;
 
 namespace WeddingConfirmationApp.Infrastructure.Repositories;
 public class UnitOfWork : IUnitOfWork
@@ -14,6 +15,7 @@ public class UnitOfWork : IUnitOfWork
     public IInvitationRepository InvitationRepository { get; }
     public IDrinkTypeRepository DrinkTypeRepository { get; }
     public IPersonConfirmationRepository PersonConfirmationRepository { get; }
+    public IUserRepository UserRepository { get; }
 
     private readonly WeddingDbContext _context;
     private readonly ILogger<UnitOfWork> _logger;
@@ -26,6 +28,7 @@ public class UnitOfWork : IUnitOfWork
         InvitationRepository = new InvitationRepository(context);
         DrinkTypeRepository = new DrinkTypeRepository(context);
         PersonConfirmationRepository = new PersonConfirmationRepository(context);
+        UserRepository = new UserRepository(context);
     }
 
     public async Task<(bool ChangesMade, IEnumerable<BaseDomainEntity> EntitiesWithErrors)> SaveChangesAsync(bool continueOnError = false)

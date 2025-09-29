@@ -51,6 +51,10 @@ import { RouterModule } from '@angular/router';
           <p><strong>Kod QR z zaproszenia nie działa?</strong></p>
           <p>Skontaktuj się z organizatorami wesela aby otrzymać link do potwierdzenia</p>
         </div>
+
+        <div class="admin-link">
+          <a routerLink="/admin" class="admin-button">Panel Administratora</a>
+        </div>
       </div>
     </div>
   `,
@@ -160,6 +164,27 @@ import { RouterModule } from '@angular/router';
 
     .help-section strong {
       color: #333;
+    }
+
+    .admin-link {
+      margin-top: 2rem;
+      text-align: center;
+    }
+
+    .admin-button {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .admin-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
     @media (max-width: 768px) {

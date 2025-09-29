@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WeddingConfirmationApp.Application.Models;
 using WeddingConfirmationApp.Application.Scopes.DrinkTypes.Commands.CreateDrinkType;
@@ -10,21 +11,25 @@ using WeddingConfirmationApp.Application.Scopes.DrinkTypes.Queries.GetDrinkTypeB
 
 namespace WeddingConfirmationApp.Api.Controllers;
 
+[Authorize(Roles = "Administrator")]
 public class DrinkTypesController : BaseApiController
 {
     public DrinkTypesController(IMediator mediator) : base(mediator)
     {}
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<DrinkTypeDto>>> GetAll()
     {
         return Ok(await _mediator.Send(new GetAllDrinkTypesQuery()));
     }
 
     [HttpGet("{Id}")]
+    [AllowAnonymous]
     public Task<ActionResult<DrinkTypeDto>> GetById([FromRoute] GetDrinkTypeByIdQuery query) => HandleRequest(query);
 
     [HttpGet("by-type/{Type}")]
+    [AllowAnonymous]
     public Task<ActionResult<DrinkTypeDto>> GetByType([FromRoute] GetDrinkTypeByTypeQuery query) => HandleRequest(query);
 
     [HttpPost]
