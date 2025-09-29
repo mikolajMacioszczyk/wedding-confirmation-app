@@ -11,17 +11,21 @@ cd wedding-confirmation-app
 cp .env.example .env
 
 # Run with Docker
-docker-compose up
-
-# Or run separately:
-# Backend: dotnet run (from backend/WeddingConfirmationApp/WeddingConfirmationApp.Api)
-# Frontend: ng serve (from frontend/)
+docker-compose up --build
 ```
 
-**URLs:**
+**Development URLs:**
 - Frontend: http://localhost:4200
-- API: http://localhost:8081
+- API: http://localhost:8081  
 - Admin Panel: http://localhost:4200/admin
+
+## Docker Architecture
+
+The application consists of following components:
+- **Frontend**: Angular app built and served by nginx
+- **Backend**: .NET 8 API in container
+- **Database**: PostgreSQL container
+- **Reverse Proxy**: nginx handles routing and API proxying
 
 ## Architecture
 
@@ -59,3 +63,44 @@ wedding-confirmation-app/
 - TypeScript
 - SCSS
 - Signals-based state management
+
+## Production Deployment
+
+### Host Configuration
+
+When deploying to production, update the following files to match your domain:
+
+#### 1. Angular Environment (`frontend/src/environments/environment.prod.ts`)
+```typescript
+export const environment = {
+  production: true,
+  apiUrl: 'https://yourdomain.com/api'  // ← Change this
+};
+```
+
+#### 2. nginx Configuration (`frontend/nginx.conf`)
+```nginx
+server {
+    listen 80;
+    server_name yourdomain.com;  # ← Change this
+    # ... rest of config
+}
+```
+
+#### 3. Docker Compose (`docker-compose.yaml`)
+```yaml
+frontend:
+  ports:
+    - "80:80"      # ← For production (port 80)
+    # - "4200:80"  # ← For development
+```
+
+### How nginx Routes Requests
+
+The frontend nginx container handles both frontend and API routing:
+
+```
+Browser → nginx (port 80/443)
+├── /api/* → Proxy to Backend (.NET API)
+└── /*     → Serve Angular App (SPA routing)
+```

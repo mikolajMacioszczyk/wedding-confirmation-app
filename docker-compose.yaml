@@ -19,3 +19,14 @@ services:
       - "8081:8080"
     depends_on:
       - database
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "4200:80"
+    depends_on:
+      - api
+    environment:
+      - NODE_ENV=production
