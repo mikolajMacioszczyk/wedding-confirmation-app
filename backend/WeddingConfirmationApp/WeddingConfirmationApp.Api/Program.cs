@@ -1,13 +1,12 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Reflection;
 using System.Text;
 using WeddingConfirmationApp.Api;
+using WeddingConfirmationApp.Api.Extensions;
 using WeddingConfirmationApp.Application.Config;
 using WeddingConfirmationApp.Application.Contracts;
-using WeddingConfirmationApp.Application.Scopes.Invitations.Mappings;
 using WeddingConfirmationApp.Application.Scopes.Persons.Commands.CreatePerson;
 using WeddingConfirmationApp.Application.Scopes.Persons.Mappings;
 using WeddingConfirmationApp.Application.Scopes.Users.Contracts;
@@ -23,7 +22,7 @@ const string CorsAllPolicy = "All";
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGenWithAuth();
 
 // Configure AutoMapper
 builder.Services.AddAutoMapper(cfg => { }, typeof(PersonMappingProfile).Assembly);

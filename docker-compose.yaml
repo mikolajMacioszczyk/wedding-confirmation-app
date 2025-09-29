@@ -13,7 +13,7 @@ services:
       context: ./backend/WeddingConfirmationApp
       dockerfile: WeddingConfirmationApp.Api/Dockerfile
     environment:
-      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
       ConnectionStrings__DefaultConnection: Host=database;Port=5432;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};Database=${POSTGRES_DB}
       DefaultAdmin__Username: ${DefaultAdminUsername}
       DefaultAdmin__Password: ${DefaultAdminPassword}
