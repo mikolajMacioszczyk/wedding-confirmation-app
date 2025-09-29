@@ -8,7 +8,6 @@ namespace WeddingConfirmationApp.Api.Controllers;
 
 // TODO: Seed default admin (from appsettings)
 // TODO: Swagger
-// TODO: Token expiration
 // TODO: FE
 
 public class AuthController : BaseApiController

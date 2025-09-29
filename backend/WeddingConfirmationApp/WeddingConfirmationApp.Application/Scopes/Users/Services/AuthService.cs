@@ -37,7 +37,7 @@ public class AuthService : IAuthService
         await _unitOfWork.SaveChangesAsync();
 
         var token = GenerateJwtToken(user);
-        var expiresAt = DateTime.UtcNow.AddHours(8);
+        var expiresAt = DateTime.UtcNow.AddMinutes(_jwtConfiguration.ExpirationInMinutes);
 
         var response = new LoginResponse
         {
@@ -90,7 +90,7 @@ public class AuthService : IAuthService
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim(ClaimTypes.Role, user.Role)
             }),
-            Expires = DateTime.UtcNow.AddHours(8),
+            Expires = DateTime.UtcNow.AddMinutes(_jwtConfiguration.ExpirationInMinutes),
             Issuer = _jwtConfiguration.Issuer,
             Audience = _jwtConfiguration.Audience,
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
