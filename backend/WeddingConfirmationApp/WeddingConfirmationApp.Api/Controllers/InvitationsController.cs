@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WeddingConfirmationApp.Application.Scopes.Invitations.Commands.AddPersonToInvitation;
 using WeddingConfirmationApp.Application.Scopes.Invitations.Commands.CreateInvitation;
@@ -11,6 +12,7 @@ using WeddingConfirmationApp.Application.Scopes.Invitations.Queries.GetInvitatio
 
 namespace WeddingConfirmationApp.Api.Controllers;
 
+[Authorize(Roles = "Administrator")]
 public class InvitationsController : BaseApiController
 {
     public InvitationsController(IMediator mediator) : base(mediator)
@@ -26,6 +28,7 @@ public class InvitationsController : BaseApiController
     public Task<ActionResult<InvitationDto>> GetById([FromRoute] GetInvitationByIdQuery query) => HandleRequest(query);
 
     [HttpGet("by-public-id/{PublicId}")]
+    [AllowAnonymous]
     public Task<ActionResult<InvitationDto>> GetByPublicId([FromRoute] GetInvitationByPublicIdQuery query) => HandleRequest(query);
 
     [HttpPost]
