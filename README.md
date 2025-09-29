@@ -74,7 +74,8 @@ When deploying to production, update the following files to match your domain:
 ```typescript
 export const environment = {
   production: true,
-  apiUrl: 'https://yourdomain.com/api'  // ← Change this
+  apiUrl: 'https://yourdomain.com/api',   // ← Change this
+  frontendDomain: 'http://localhost:4200' // ← Change this
 };
 ```
 

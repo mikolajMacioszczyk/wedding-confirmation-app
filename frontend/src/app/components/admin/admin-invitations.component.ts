@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { WeddingApiService } from '../../services/wedding-api.service';
+import { QrCodeService } from '../../services/qr-code.service';
 import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationCommand } from '../../models/invitation.model';
 
 @Component({
@@ -118,9 +119,25 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
                   </div>
 
                   <div class="invitation-footer">
-                    <a [routerLink]="['/potwierdz', invitation.publicId]" target="_blank" class="btn btn-link btn-sm">
-                      👁️ Podgląd
-                    </a>
+                    <div class="footer-actions">
+                      <a [routerLink]="['/potwierdz', invitation.publicId]" target="_blank" class="btn btn-link btn-sm">
+                        👁️ Podgląd
+                      </a>
+                      <button
+                        (click)="showQrCode(invitation)"
+                        class="btn btn-secondary btn-sm"
+                        [disabled]="generatingQr().has(invitation.id)"
+                      >
+                        {{ generatingQr().has(invitation.id) ? 'Generowanie...' : '🔗 QR Code' }}
+                      </button>
+                      <button
+                        (click)="downloadQrCode(invitation)"
+                        class="btn btn-secondary btn-sm"
+                        [disabled]="downloadingQr().has(invitation.id)"
+                      >
+                        {{ downloadingQr().has(invitation.id) ? 'Pobieranie...' : '⬇️ Pobierz QR' }}
+                      </button>
+                    </div>
                     <span class="invitation-url">
                       /potwierdz/{{ invitation.publicId }}
                     </span>
@@ -187,6 +204,49 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
                       }
                     </div>
                   }
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- QR Code Modal -->
+      @if (qrCodeModal()) {
+        <div class="modal-overlay" (click)="closeQrCodeModal()">
+          <div class="modal qr-modal" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h3>QR Code dla zaproszenia</h3>
+              <button (click)="closeQrCodeModal()" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+              @if (currentQrCode()) {
+                <div class="qr-code-container">
+                  <div class="qr-code-info">
+                    <h4>{{ qrCodeModal()?.publicId }}</h4>
+                    <p class="qr-url">{{ getConfirmationUrl(qrCodeModal()?.publicId || '') }}</p>
+                  </div>
+                  <div class="qr-code-image">
+                    <img [src]="currentQrCode()" alt="QR Code" />
+                  </div>
+                  <div class="qr-actions">
+                    <button
+                      (click)="downloadCurrentQrCode()"
+                      class="btn btn-primary"
+                    >
+                      ⬇️ Pobierz jako PNG
+                    </button>
+                    <button
+                      (click)="copyQrUrl()"
+                      class="btn btn-secondary"
+                    >
+                      📋 Kopiuj link
+                    </button>
+                  </div>
+                </div>
+              } @else {
+                <div class="loading-qr">
+                  <p>Generowanie kodu QR...</p>
                 </div>
               }
             </div>
@@ -455,17 +515,71 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
 
     .invitation-footer {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      flex-direction: column;
+      gap: 10px;
       margin-top: 15px;
       padding-top: 10px;
       border-top: 1px solid #eee;
+    }
+
+    .footer-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
     .invitation-url {
       font-family: monospace;
       color: #6c757d;
       font-size: 0.85em;
+    }
+
+    /* QR Code Modal */
+    .qr-modal {
+      max-width: 500px;
+    }
+
+    .qr-code-container {
+      text-align: center;
+    }
+
+    .qr-code-info h4 {
+      margin: 0 0 10px 0;
+      color: #333;
+    }
+
+    .qr-url {
+      margin: 0 0 20px 0;
+      color: #6c757d;
+      font-family: monospace;
+      font-size: 0.9em;
+      word-break: break-all;
+    }
+
+    .qr-code-image {
+      margin: 20px 0;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+
+    .qr-code-image img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .qr-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .loading-qr {
+      text-align: center;
+      padding: 40px;
+      color: #6c757d;
     }
 
     /* Modal Styles */
@@ -588,6 +702,16 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
         gap: 10px;
       }
 
+      .footer-actions {
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .qr-actions {
+        flex-direction: column;
+        gap: 10px;
+      }
+
       .form-actions {
         flex-direction: column;
       }
@@ -612,6 +736,12 @@ export class AdminInvitationsComponent implements OnInit {
   assigningPersons = signal<Set<string>>(new Set());
   removingPersons = signal<Set<string>>(new Set());
 
+  // QR Code related signals
+  generatingQr = signal<Set<string>>(new Set());
+  downloadingQr = signal<Set<string>>(new Set());
+  qrCodeModal = signal<InvitationDto | null>(null);
+  currentQrCode = signal<string>('');
+
   invitations = signal<InvitationDto[]>([]);
   allPersons = signal<PersonDto[]>([]);
 
@@ -622,7 +752,10 @@ export class AdminInvitationsComponent implements OnInit {
 
   availablePersons = signal<PersonDto[]>([]);
 
-  constructor(private weddingApi: WeddingApiService) {}
+  constructor(
+    private weddingApi: WeddingApiService,
+    private qrCodeService: QrCodeService
+  ) {}
 
   ngOnInit() {
     this.loadInvitations();
@@ -814,6 +947,76 @@ export class AdminInvitationsComponent implements OnInit {
     this.editingInvitation.set(null);
     this.invitationForm.publicId = '';
     this.invitationForm.invitationText = '';
+  }
+
+  // QR Code Methods
+  async showQrCode(invitation: InvitationDto) {
+    this.generatingQr.update(set => new Set([...set, invitation.id]));
+    this.qrCodeModal.set(invitation);
+    this.currentQrCode.set('');
+
+    try {
+      const qrCodeDataUrl = await this.qrCodeService.generateQrCodeForInvitation(invitation.publicId);
+      this.currentQrCode.set(qrCodeDataUrl);
+    } catch (error) {
+      console.error('Error generating QR code:', error);
+      this.error.set('Nie udało się wygenerować kodu QR');
+      this.closeQrCodeModal();
+    } finally {
+      this.generatingQr.update(set => {
+        const newSet = new Set(set);
+        newSet.delete(invitation.id);
+        return newSet;
+      });
+    }
+  }
+
+  async downloadQrCode(invitation: InvitationDto) {
+    this.downloadingQr.update(set => new Set([...set, invitation.id]));
+
+    try {
+      await this.qrCodeService.downloadQrCode(invitation.publicId);
+      this.showSuccess('Kod QR został pobrany');
+    } catch (error) {
+      console.error('Error downloading QR code:', error);
+      this.error.set('Nie udało się pobrać kodu QR');
+    } finally {
+      this.downloadingQr.update(set => {
+        const newSet = new Set(set);
+        newSet.delete(invitation.id);
+        return newSet;
+      });
+    }
+  }
+
+  closeQrCodeModal() {
+    this.qrCodeModal.set(null);
+    this.currentQrCode.set('');
+  }
+
+  downloadCurrentQrCode() {
+    const invitation = this.qrCodeModal();
+    if (invitation) {
+      this.downloadQrCode(invitation);
+    }
+  }
+
+  async copyQrUrl() {
+    const invitation = this.qrCodeModal();
+    if (invitation) {
+      const url = this.getConfirmationUrl(invitation.publicId);
+      try {
+        await navigator.clipboard.writeText(url);
+        this.showSuccess('Link został skopiowany do schowka');
+      } catch (error) {
+        console.error('Error copying to clipboard:', error);
+        this.error.set('Nie udało się skopiować linku');
+      }
+    }
+  }
+
+  getConfirmationUrl(publicId: string): string {
+    return this.qrCodeService.getConfirmationUrl(publicId);
   }
 
   private showSuccess(message: string) {
