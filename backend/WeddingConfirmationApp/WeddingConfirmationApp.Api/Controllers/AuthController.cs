@@ -6,8 +6,6 @@ using WeddingConfirmationApp.Application.Scopes.Users.Models;
 
 namespace WeddingConfirmationApp.Api.Controllers;
 
-// TODO: FE
-
 public class AuthController : BaseApiController
 {
     public AuthController(IMediator mediator) : base(mediator)
