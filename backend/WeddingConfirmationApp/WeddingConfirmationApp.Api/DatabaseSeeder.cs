@@ -1,7 +1,4 @@
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 using WeddingConfirmationApp.Domain.Entities;
 using WeddingConfirmationApp.Infrastructure;
 
@@ -49,22 +46,20 @@ public class DatabaseSeeder : IHostedService
         }
 
         // Check if admin user already exists
-        var existingAdmin = await dbContext.Users.FindAsync(1);
+        var existingAdmin = await dbContext.Users.FirstOrDefaultAsync();
         if (existingAdmin != null)
         {
-            _logger.LogInformation("Default admin user already exists. Skipping seeding.");
+            _logger.LogInformation("Admin user already exists. Skipping seeding.");
             return;
         }
 
         // Create default admin user
         var adminUser = new User
         {
-            Id = 1,
+            Id = Guid.NewGuid(),
             Username = adminUsername,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword),
             Role = "Administrator",
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
             LastLoginAt = DateTime.UtcNow
         };
 
