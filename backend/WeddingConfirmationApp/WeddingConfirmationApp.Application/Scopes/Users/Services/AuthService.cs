@@ -50,33 +50,6 @@ public class AuthService : IAuthService
         return response;
     }
 
-    public Task<Result<bool>> ValidateTokenAsync(string token)
-    {
-        try
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_jwtConfiguration.Key);
-
-            tokenHandler.ValidateToken(token, new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(key),
-                ValidateIssuer = true,
-                ValidIssuer = _jwtConfiguration.Issuer,
-                ValidateAudience = true,
-                ValidAudience = _jwtConfiguration.Audience,
-                ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero
-            }, out SecurityToken validatedToken);
-
-            return Task.FromResult((Result<bool>)true);
-        }
-        catch
-        {
-            return Task.FromResult((Result<bool>)false);
-        }
-    }
-
     private string GenerateJwtToken(User user)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
