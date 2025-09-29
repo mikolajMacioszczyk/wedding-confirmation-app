@@ -6,7 +6,6 @@ using WeddingConfirmationApp.Application.Scopes.Users.Models;
 
 namespace WeddingConfirmationApp.Api.Controllers;
 
-// TODO: Seed default admin (from appsettings)
 // TODO: Swagger
 // TODO: FE
 

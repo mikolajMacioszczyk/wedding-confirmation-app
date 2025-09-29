@@ -13,19 +13,25 @@ services:
       context: ./backend/WeddingConfirmationApp
       dockerfile: WeddingConfirmationApp.Api/Dockerfile
     environment:
-      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
       ConnectionStrings__DefaultConnection: Host=database;Port=5432;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};Database=${POSTGRES_DB}
+      DefaultAdmin__Username: ${DefaultAdminUsername}
+      DefaultAdmin__Password: ${DefaultAdminPassword}
+      Jwt__Key: ${JwtKey}
+      Jwt__Issuer: ${JwtIssuer}
+      Jwt__Audience: ${JwtAudience}
+      AllowedOrigins: ${AllowedOrigins}
     ports:
       - "8081:8080"
     depends_on:
       - database
 
-  frontend:
+  nginx:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "4200:80"
+      - "${AppPort}:80"
     depends_on:
       - api
     environment:

@@ -73,6 +73,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 
 builder.Services.AddHostedService<DatabaseMigrator>();
+builder.Services.AddHostedService<DatabaseSeeder>();
 
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string>()!;
 
