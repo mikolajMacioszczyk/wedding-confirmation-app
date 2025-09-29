@@ -21,7 +21,7 @@ docker-compose up --build
 
 ## Docker Architecture
 
-The application consist of following components:
+The application consists of following components:
 - **Frontend**: Angular app built and served by nginx
 - **Backend**: .NET 8 API in container
 - **Database**: PostgreSQL container
