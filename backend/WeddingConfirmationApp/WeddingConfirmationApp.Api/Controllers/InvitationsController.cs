@@ -13,9 +13,9 @@ using WeddingConfirmationApp.Application.Scopes.Invitations.Queries.GetInvitatio
 namespace WeddingConfirmationApp.Api.Controllers;
 
 [Authorize(Roles = "Administrator")]
-public class InvitationsController : BaseApiController
+public class InvitationsController : BaseApiController<InvitationsController>
 {
-    public InvitationsController(IMediator mediator) : base(mediator)
+    public InvitationsController(IMediator mediator, ILogger<InvitationsController> logger) : base(mediator, logger)
     {}
 
     [HttpGet]

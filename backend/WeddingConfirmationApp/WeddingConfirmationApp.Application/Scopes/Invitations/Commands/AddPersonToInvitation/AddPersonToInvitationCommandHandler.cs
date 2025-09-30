@@ -37,6 +37,12 @@ public class AddPersonToInvitationCommandHandler : IRequestHandler<AddPersonToIn
             return new Failure($"Person with id {request.PersonId} is already in this invitation");
         }
 
+        var invitationConfirmations = await _unitOfWork.PersonConfirmationRepository.GetByInvitationIdAsync(request.InvitationId);
+        if (invitationConfirmations.Any())
+        {
+            return new Failure($"This invitation have existing confirmations, cannot modify persons list");
+        }
+
         invitation.Persons.Add(person);
         
         var (changesMade, entitiesWithErrors) = await _unitOfWork.SaveChangesAsync();
