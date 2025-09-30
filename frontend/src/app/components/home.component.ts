@@ -9,7 +9,7 @@ import { RouterModule } from '@angular/router';
   template: `
     <div class="home-container">
       <div class="home-card">
-        <h1>Wesele Alicji i Mikołaj</h1>
+        <h1>Wesele Alicji i Mikołaja</h1>
         <p>Witamy w aplikacji do potwierdzania obecności na weselu.</p>
 
         <div class="qr-instructions">
