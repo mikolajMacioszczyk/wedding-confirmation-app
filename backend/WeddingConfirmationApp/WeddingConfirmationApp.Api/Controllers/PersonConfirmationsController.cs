@@ -11,9 +11,9 @@ using WeddingConfirmationApp.Application.Scopes.PersonConfirmations.Queries.GetP
 namespace WeddingConfirmationApp.Api.Controllers;
 
 [Authorize(Roles = "Administrator")]
-public class PersonConfirmationsController : BaseApiController
+public class PersonConfirmationsController : BaseApiController<PersonConfirmationsController>
 {
-    public PersonConfirmationsController(IMediator mediator) : base(mediator)
+    public PersonConfirmationsController(IMediator mediator, ILogger<PersonConfirmationsController> logger) : base(mediator, logger)
     {}
 
     [HttpGet]

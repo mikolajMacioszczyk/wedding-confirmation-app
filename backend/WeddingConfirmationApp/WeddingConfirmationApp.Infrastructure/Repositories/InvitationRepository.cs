@@ -15,7 +15,7 @@ public class InvitationRepository : IInvitationRepository
 
     public async Task<IEnumerable<Invitation>> GetAllAsync()
     {
-        return await _context.Invitations.ToListAsync();
+        return await _context.Invitations.Include(i => i.Persons).ToListAsync();
     }
 
     public Task<Invitation?> GetByIdAsync(Guid id)

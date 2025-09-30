@@ -12,8 +12,8 @@ using WeddingConfirmationApp.Infrastructure;
 namespace WeddingConfirmationApp.Infrastructure.Migrations
 {
     [DbContext(typeof(WeddingDbContext))]
-    [Migration("20250928140111_RemovedIsValid")]
-    partial class RemovedIsValid
+    [Migration("20250930092513_MakeSelectedDrinkIdNullable")]
+    partial class MakeSelectedDrinkIdNullable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -102,7 +102,7 @@ namespace WeddingConfirmationApp.Infrastructure.Migrations
                     b.Property<Guid>("PersonId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("SelectedDrinkId")
+                    b.Property<Guid?>("SelectedDrinkId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
@@ -114,6 +114,38 @@ namespace WeddingConfirmationApp.Infrastructure.Migrations
                     b.HasIndex("SelectedDrinkId");
 
                     b.ToTable("PersonConfirmations");
+                });
+
+            modelBuilder.Entity("WeddingConfirmationApp.Domain.Entities.User", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("LastLoginAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Username")
+                        .IsUnique();
+
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("WeddingConfirmationApp.Domain.Entities.Person", b =>
@@ -128,20 +160,19 @@ namespace WeddingConfirmationApp.Infrastructure.Migrations
                     b.HasOne("WeddingConfirmationApp.Domain.Entities.Invitation", "Invitation")
                         .WithMany()
                         .HasForeignKey("InvitationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("WeddingConfirmationApp.Domain.Entities.Person", "Person")
                         .WithMany()
                         .HasForeignKey("PersonId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("WeddingConfirmationApp.Domain.Entities.DrinkType", "SelectedDrink")
                         .WithMany()
                         .HasForeignKey("SelectedDrinkId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Invitation");
 

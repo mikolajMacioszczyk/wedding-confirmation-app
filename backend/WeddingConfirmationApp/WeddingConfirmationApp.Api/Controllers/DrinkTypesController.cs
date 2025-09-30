@@ -12,9 +12,9 @@ using WeddingConfirmationApp.Application.Scopes.DrinkTypes.Queries.GetDrinkTypeB
 namespace WeddingConfirmationApp.Api.Controllers;
 
 [Authorize(Roles = "Administrator")]
-public class DrinkTypesController : BaseApiController
+public class DrinkTypesController : BaseApiController<DrinkTypesController>
 {
-    public DrinkTypesController(IMediator mediator) : base(mediator)
+    public DrinkTypesController(IMediator mediator, ILogger<DrinkTypesController> logger) : base(mediator, logger)
     {}
 
     [HttpGet]

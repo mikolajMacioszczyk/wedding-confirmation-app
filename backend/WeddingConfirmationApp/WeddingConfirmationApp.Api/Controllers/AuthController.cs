@@ -6,9 +6,9 @@ using WeddingConfirmationApp.Application.Scopes.Users.Models;
 
 namespace WeddingConfirmationApp.Api.Controllers;
 
-public class AuthController : BaseApiController
+public class AuthController : BaseApiController<AuthController>
 {
-    public AuthController(IMediator mediator) : base(mediator)
+    public AuthController(IMediator mediator, ILogger<AuthController> logger) : base(mediator, logger)
     {}
 
     [HttpPost("login")]

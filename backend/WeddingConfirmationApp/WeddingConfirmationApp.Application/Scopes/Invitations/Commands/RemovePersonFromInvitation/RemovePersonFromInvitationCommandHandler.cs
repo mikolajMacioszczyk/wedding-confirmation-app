@@ -31,6 +31,12 @@ public class RemovePersonFromInvitationCommandHandler : IRequestHandler<RemovePe
             return new NotFound(request.PersonId, $"Not found person with id = {request.PersonId}");
         }
 
+        var invitationConfirmations = await _unitOfWork.PersonConfirmationRepository.GetByInvitationIdAsync(request.InvitationId);
+        if (invitationConfirmations.Any())
+        {
+            return new Failure($"This invitation have existing confirmations, cannot modify persons list");
+        }
+
         invitation.Persons.Remove(personToRemove);
         
         var (changesMade, entitiesWithErrors) = await _unitOfWork.SaveChangesAsync();

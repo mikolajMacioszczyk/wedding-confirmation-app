@@ -6,16 +6,16 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace WeddingConfirmationApp.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class ChangePublicIdToString : Migration
+    public partial class MakeSelectedDrinkIdNullable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<string>(
-                name: "PublicId",
-                table: "Invitations",
-                type: "text",
-                nullable: false,
+            migrationBuilder.AlterColumn<Guid>(
+                name: "SelectedDrinkId",
+                table: "PersonConfirmations",
+                type: "uuid",
+                nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
         }
@@ -24,12 +24,14 @@ namespace WeddingConfirmationApp.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<Guid>(
-                name: "PublicId",
-                table: "Invitations",
+                name: "SelectedDrinkId",
+                table: "PersonConfirmations",
                 type: "uuid",
                 nullable: false,
-                oldClrType: typeof(string),
-                oldType: "text");
+                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
+                oldClrType: typeof(Guid),
+                oldType: "uuid",
+                oldNullable: true);
         }
     }
 }

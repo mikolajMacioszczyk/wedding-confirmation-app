@@ -2,6 +2,7 @@ import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { WeddingApiService } from '../../services/wedding-api.service';
+import { ErrorHandlerService } from '../../services/error-handler.service';
 import { PersonConfirmationDto, InvitationDto, PersonDto, DrinkTypeDto } from '../../models/invitation.model';
 
 interface ConfirmationWithDetails {
@@ -34,11 +35,6 @@ interface ConfirmationWithDetails {
       @if (loading()) {
         <div class="loading">
           <p>Ładowanie potwierdzeń...</p>
-        </div>
-      } @else if (error()) {
-        <div class="error">
-          <p>{{ error() }}</p>
-          <button (click)="loadConfirmations()" class="retry-btn">Spróbuj ponownie</button>
         </div>
       } @else {
         @if (confirmationsWithDetails().length === 0) {
@@ -381,7 +377,6 @@ interface ConfirmationWithDetails {
 })
 export class AdminConfirmationsComponent implements OnInit {
   loading = signal<boolean>(false);
-  error = signal<string>('');
 
   confirmations = signal<PersonConfirmationDto[]>([]);
   invitations = signal<InvitationDto[]>([]);
@@ -435,7 +430,10 @@ export class AdminConfirmationsComponent implements OnInit {
       .sort((a, b) => b.count - a.count);
   });
 
-  constructor(private weddingApi: WeddingApiService) {
+  constructor(
+    private weddingApi: WeddingApiService,
+    private errorHandler: ErrorHandlerService
+  ) {
     // Initialize filtered confirmations with all confirmations
     this.filteredConfirmations.set(this.confirmationsWithDetails());
   }
@@ -446,7 +444,6 @@ export class AdminConfirmationsComponent implements OnInit {
 
   loadConfirmations() {
     this.loading.set(true);
-    this.error.set('');
 
     Promise.all([
       this.weddingApi.getAllPersonConfirmations().toPromise(),
@@ -462,7 +459,6 @@ export class AdminConfirmationsComponent implements OnInit {
       this.loading.set(false);
     }).catch((err) => {
       console.error('Error loading confirmations data:', err);
-      this.error.set('Nie udało się załadować danych potwierdzeń');
       this.loading.set(false);
     });
   }

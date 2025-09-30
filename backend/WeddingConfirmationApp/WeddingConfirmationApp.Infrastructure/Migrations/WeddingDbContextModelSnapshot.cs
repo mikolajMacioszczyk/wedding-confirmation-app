@@ -99,7 +99,7 @@ namespace WeddingConfirmationApp.Infrastructure.Migrations
                     b.Property<Guid>("PersonId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("SelectedDrinkId")
+                    b.Property<Guid?>("SelectedDrinkId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
@@ -157,20 +157,19 @@ namespace WeddingConfirmationApp.Infrastructure.Migrations
                     b.HasOne("WeddingConfirmationApp.Domain.Entities.Invitation", "Invitation")
                         .WithMany()
                         .HasForeignKey("InvitationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("WeddingConfirmationApp.Domain.Entities.Person", "Person")
                         .WithMany()
                         .HasForeignKey("PersonId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("WeddingConfirmationApp.Domain.Entities.DrinkType", "SelectedDrink")
                         .WithMany()
                         .HasForeignKey("SelectedDrinkId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Invitation");
 

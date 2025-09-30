@@ -12,9 +12,9 @@ using WeddingConfirmationApp.Application.Scopes.Persons.Queries.GetPersonById;
 namespace WeddingConfirmationApp.Api.Controllers;
 
 [Authorize(Roles = "Administrator")]
-public class PersonsController : BaseApiController
+public class PersonsController : BaseApiController<PersonsController>
 {
-    public PersonsController(IMediator mediator) : base(mediator)
+    public PersonsController(IMediator mediator, ILogger<PersonsController> logger) : base(mediator, logger)
     {}
 
     [HttpGet]
