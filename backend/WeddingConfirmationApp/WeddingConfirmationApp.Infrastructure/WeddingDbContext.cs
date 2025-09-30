@@ -22,14 +22,29 @@ public class WeddingDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<DrinkType>()
+            .HasIndex(i => i.Type);
+
+        modelBuilder.Entity<DrinkType>()
+            .HasMany<PersonConfirmation>()
+            .WithOne(d => d.SelectedDrink)
+            .OnDelete(DeleteBehavior.Restrict);
+
         modelBuilder.Entity<Invitation>()
             .HasIndex(i => i.PublicId);
 
-        modelBuilder.Entity<DrinkType>()
-            .HasIndex(i => i.Type);
+        modelBuilder.Entity<Invitation>()
+            .HasMany<PersonConfirmation>()
+            .WithOne(d => d.Invitation)
+            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Username)
             .IsUnique();
+
+        modelBuilder.Entity<Person>()
+            .HasMany<PersonConfirmation>()
+            .WithOne(d => d.Person)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
