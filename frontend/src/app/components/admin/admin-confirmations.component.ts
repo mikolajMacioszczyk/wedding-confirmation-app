@@ -58,6 +58,7 @@ interface ConfirmationWithDetails {
               <div class="col-person">Osoba</div>
               <div class="col-invitation">Zaproszenie</div>
               <div class="col-status">Status</div>
+              <div class="col-date">Data potwierdzenia</div>
               <div class="col-drink">Napój</div>
             </div>
 
@@ -81,6 +82,14 @@ interface ConfirmationWithDetails {
                   <span class="status-badge" [class.confirmed]="item.confirmation.confirmed">
                     {{ item.confirmation.confirmed ? '✅ Potwierdzone' : '❌ Odmowa' }}
                   </span>
+                </div>
+
+                <div class="col-date">
+                  @if (item.confirmation.confirmed && item.confirmation.confirmedAt) {
+                    <span class="date-info">{{ formatDate(item.confirmation.confirmedAt) }}</span>
+                  } @else {
+                    <span class="no-date">-</span>
+                  }
                 </div>
 
                 <div class="col-drink">
@@ -206,7 +215,7 @@ interface ConfirmationWithDetails {
 
     .table-header {
       display: grid;
-      grid-template-columns: 2fr 2fr 1.5fr 1.5fr 1fr;
+      grid-template-columns: 1.8fr 1.8fr 1.2fr 1.5fr 1fr;
       background: #f8f9fa;
       padding: 15px 20px;
       font-weight: 600;
@@ -216,7 +225,7 @@ interface ConfirmationWithDetails {
 
     .table-row {
       display: grid;
-      grid-template-columns: 2fr 2fr 1.5fr 1.5fr 1fr;
+      grid-template-columns: 1.8fr 1.8fr 1.2fr 1.5fr 1fr;
       padding: 20px;
       border-bottom: 1px solid #f0f0f0;
       transition: background-color 0.3s ease;
@@ -276,6 +285,17 @@ interface ConfirmationWithDetails {
     }
 
     .no-drink {
+      color: #6c757d;
+      font-style: italic;
+    }
+
+    .date-info {
+      color: #333;
+      font-weight: 500;
+      font-size: 0.9em;
+    }
+
+    .no-date {
       color: #6c757d;
       font-style: italic;
     }
@@ -354,6 +374,7 @@ interface ConfirmationWithDetails {
       .col-person::before { content: "Osoba: "; font-weight: bold; }
       .col-invitation::before { content: "Zaproszenie: "; font-weight: bold; }
       .col-status::before { content: "Status: "; font-weight: bold; }
+      .col-date::before { content: "Data potwierdzenia: "; font-weight: bold; }
       .col-drink::before { content: "Napój: "; font-weight: bold; }
       .col-valid::before { content: "Ważność: "; font-weight: bold; }
     }
@@ -473,5 +494,16 @@ export class AdminConfirmationsComponent implements OnInit {
     } else {
       this.filteredConfirmations.set(allConfirmations);
     }
+  }
+
+  formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pl-PL', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   }
 }

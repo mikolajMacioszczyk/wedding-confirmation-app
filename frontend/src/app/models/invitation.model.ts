@@ -25,6 +25,7 @@ export interface PersonConfirmationDto {
   invitationId: string;
   personId: string;
   confirmed: boolean;
+  confirmedAt: string | null;
   isValid: boolean;
   selectedDrinkId: string | null;
 }

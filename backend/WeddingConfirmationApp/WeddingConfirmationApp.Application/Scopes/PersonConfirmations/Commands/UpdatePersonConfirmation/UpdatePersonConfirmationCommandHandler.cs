@@ -41,6 +41,7 @@ public class UpdatePersonConfirmationCommandHandler : IRequestHandler<UpdatePers
 
         // Update properties
         existingPersonConfirmation.Confirmed = request.Confirmed;
+        existingPersonConfirmation.ConfirmedAt = DateTime.UtcNow;
         existingPersonConfirmation.SelectedDrinkId = request.SelectedDrinkId;
 
         var updatedPersonConfirmation = await _unitOfWork.PersonConfirmationRepository.UpdateAsync(existingPersonConfirmation);
