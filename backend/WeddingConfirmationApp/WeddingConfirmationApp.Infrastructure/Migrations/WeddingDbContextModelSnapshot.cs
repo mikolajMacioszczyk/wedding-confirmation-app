@@ -147,9 +147,11 @@ namespace WeddingConfirmationApp.Infrastructure.Migrations
 
             modelBuilder.Entity("WeddingConfirmationApp.Domain.Entities.Person", b =>
                 {
-                    b.HasOne("WeddingConfirmationApp.Domain.Entities.Invitation", null)
+                    b.HasOne("WeddingConfirmationApp.Domain.Entities.Invitation", "Invitation")
                         .WithMany("Persons")
                         .HasForeignKey("InvitationId");
+
+                    b.Navigation("Invitation");
                 });
 
             modelBuilder.Entity("WeddingConfirmationApp.Domain.Entities.PersonConfirmation", b =>

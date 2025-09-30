@@ -12,8 +12,8 @@ using WeddingConfirmationApp.Infrastructure;
 namespace WeddingConfirmationApp.Infrastructure.Migrations
 {
     [DbContext(typeof(WeddingDbContext))]
-    [Migration("20250930092513_MakeSelectedDrinkIdNullable")]
-    partial class MakeSelectedDrinkIdNullable
+    [Migration("20250930122822_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -150,9 +150,11 @@ namespace WeddingConfirmationApp.Infrastructure.Migrations
 
             modelBuilder.Entity("WeddingConfirmationApp.Domain.Entities.Person", b =>
                 {
-                    b.HasOne("WeddingConfirmationApp.Domain.Entities.Invitation", null)
+                    b.HasOne("WeddingConfirmationApp.Domain.Entities.Invitation", "Invitation")
                         .WithMany("Persons")
                         .HasForeignKey("InvitationId");
+
+                    b.Navigation("Invitation");
                 });
 
             modelBuilder.Entity("WeddingConfirmationApp.Domain.Entities.PersonConfirmation", b =>
