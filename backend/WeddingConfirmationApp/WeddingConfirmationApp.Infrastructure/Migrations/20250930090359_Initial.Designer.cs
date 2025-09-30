@@ -12,8 +12,8 @@ using WeddingConfirmationApp.Infrastructure;
 namespace WeddingConfirmationApp.Infrastructure.Migrations
 {
     [DbContext(typeof(WeddingDbContext))]
-    [Migration("20250928140111_RemovedIsValid")]
-    partial class RemovedIsValid
+    [Migration("20250930090359_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -116,6 +116,38 @@ namespace WeddingConfirmationApp.Infrastructure.Migrations
                     b.ToTable("PersonConfirmations");
                 });
 
+            modelBuilder.Entity("WeddingConfirmationApp.Domain.Entities.User", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("LastLoginAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Username")
+                        .IsUnique();
+
+                    b.ToTable("Users");
+                });
+
             modelBuilder.Entity("WeddingConfirmationApp.Domain.Entities.Person", b =>
                 {
                     b.HasOne("WeddingConfirmationApp.Domain.Entities.Invitation", null)
@@ -128,19 +160,19 @@ namespace WeddingConfirmationApp.Infrastructure.Migrations
                     b.HasOne("WeddingConfirmationApp.Domain.Entities.Invitation", "Invitation")
                         .WithMany()
                         .HasForeignKey("InvitationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("WeddingConfirmationApp.Domain.Entities.Person", "Person")
                         .WithMany()
                         .HasForeignKey("PersonId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("WeddingConfirmationApp.Domain.Entities.DrinkType", "SelectedDrink")
                         .WithMany()
                         .HasForeignKey("SelectedDrinkId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Invitation");

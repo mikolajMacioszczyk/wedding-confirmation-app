@@ -157,19 +157,19 @@ namespace WeddingConfirmationApp.Infrastructure.Migrations
                     b.HasOne("WeddingConfirmationApp.Domain.Entities.Invitation", "Invitation")
                         .WithMany()
                         .HasForeignKey("InvitationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("WeddingConfirmationApp.Domain.Entities.Person", "Person")
                         .WithMany()
                         .HasForeignKey("PersonId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("WeddingConfirmationApp.Domain.Entities.DrinkType", "SelectedDrink")
                         .WithMany()
                         .HasForeignKey("SelectedDrinkId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Invitation");
