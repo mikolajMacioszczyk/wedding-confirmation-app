@@ -7,4 +7,4 @@ namespace WeddingConfirmationApp.Application.Scopes.PersonConfirmations.Commands
 public record UpdatePersonConfirmationCommand(
     Guid Id,
     bool Confirmed, 
-    Guid SelectedDrinkId) : IRequest<Result<PersonConfirmationDto>>;
+    Guid? SelectedDrinkId) : IRequest<Result<PersonConfirmationDto>>;

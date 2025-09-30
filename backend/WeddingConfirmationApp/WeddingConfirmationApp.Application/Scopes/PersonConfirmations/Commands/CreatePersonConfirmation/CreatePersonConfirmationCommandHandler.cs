@@ -34,11 +34,18 @@ public class CreatePersonConfirmationCommandHandler : IRequestHandler<CreatePers
             return new NotFound(request.PersonId, "Person not found");
         }
 
-        // Check if drink type exists
-        var drinkType = await _unitOfWork.DrinkTypeRepository.GetByIdAsync(request.SelectedDrinkId);
-        if (drinkType is null)
+        // Check if drink type exists (only when confirmed and drink is selected)
+        if (request.Confirmed && request.SelectedDrinkId.HasValue)
         {
-            return new NotFound(request.SelectedDrinkId, "Drink type not found");
+            var drinkType = await _unitOfWork.DrinkTypeRepository.GetByIdAsync(request.SelectedDrinkId.Value);
+            if (drinkType is null)
+            {
+                return new NotFound(request.SelectedDrinkId.Value, "Drink type not found");
+            }
+        }
+        else if (request.Confirmed && !request.SelectedDrinkId.HasValue)
+        {
+            return new Failure("SelectedDrinkId is required when Confirmed is true");
         }
 
         var personConfirmation = await UpdateOrCreateNew(request);

@@ -15,7 +15,7 @@ interface PersonWithConfirmation {
   person: PersonDto;
   confirmation: PersonConfirmationDto | null;
   confirmed: boolean;
-  selectedDrinkId: string;
+  selectedDrinkId: string | null;
 }
 
 @Component({
@@ -52,6 +52,7 @@ interface PersonWithConfirmation {
                           type="checkbox"
                           [(ngModel)]="personWithConf.confirmed"
                           name="confirmed_{{ personWithConf.person.id }}"
+                          (change)="onConfirmationChange(personWithConf)"
                         >
                         <span class="checkmark"></span>
                         Będę na weselu
@@ -66,7 +67,7 @@ interface PersonWithConfirmation {
                             id="drink_{{ personWithConf.person.id }}"
                             required
                           >
-                            <option value="">-- Wybierz alkohol --</option>
+                            <option [value]="null">-- Wybierz alkohol --</option>
                             @for (drink of drinkTypes(); track drink.id) {
                               <option [value]="drink.id">{{ drink.type }}</option>
                             }
@@ -299,7 +300,7 @@ export class ConfirmationComponent implements OnInit {
         person,
         confirmation,
         confirmed: confirmation?.confirmed || false,
-        selectedDrinkId: confirmation?.selectedDrinkId || ''
+        selectedDrinkId: confirmation?.selectedDrinkId || null
       };
     });
   });
@@ -362,6 +363,13 @@ export class ConfirmationComponent implements OnInit {
     });
   }
 
+  onConfirmationChange(personWithConf: PersonWithConfirmation) {
+    // Reset selectedDrinkId to null when unchecking confirmation
+    if (!personWithConf.confirmed) {
+      personWithConf.selectedDrinkId = null;
+    }
+  }
+
   isFormValid(): boolean {
     const persons = this.personsWithConfirmations();
     return persons.every(p => !p.confirmed || (p.confirmed && p.selectedDrinkId));
@@ -375,12 +383,15 @@ export class ConfirmationComponent implements OnInit {
     const invitation = this.invitation()!;
     const persons = this.personsWithConfirmations();
     const requests = persons.map(personWithConf => {
+      // Send null for selectedDrinkId when not confirmed
+      const selectedDrinkId = personWithConf.confirmed ? personWithConf.selectedDrinkId : null;
+
       if (personWithConf.confirmation) {
         // Update existing confirmation
         return this.weddingApi.updatePersonConfirmation({
           id: personWithConf.confirmation.id,
           confirmed: personWithConf.confirmed,
-          selectedDrinkId: personWithConf.selectedDrinkId
+          selectedDrinkId: selectedDrinkId
         });
       } else {
         // Create new confirmation
@@ -388,7 +399,7 @@ export class ConfirmationComponent implements OnInit {
           invitationId: invitation.id,
           personId: personWithConf.person.id,
           confirmed: personWithConf.confirmed,
-          selectedDrinkId: personWithConf.selectedDrinkId
+          selectedDrinkId: selectedDrinkId
         });
       }
     });

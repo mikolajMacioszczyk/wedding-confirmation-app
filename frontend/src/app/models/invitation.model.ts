@@ -22,20 +22,20 @@ export interface PersonConfirmationDto {
   personId: string;
   confirmed: boolean;
   isValid: boolean;
-  selectedDrinkId: string;
+  selectedDrinkId: string | null;
 }
 
 export interface CreatePersonConfirmationCommand {
   invitationId: string;
   personId: string;
   confirmed: boolean;
-  selectedDrinkId: string;
+  selectedDrinkId: string | null;
 }
 
 export interface UpdatePersonConfirmationCommand {
   id: string;
   confirmed: boolean;
-  selectedDrinkId: string;
+  selectedDrinkId: string | null;
 }
 
 // Admin Commands

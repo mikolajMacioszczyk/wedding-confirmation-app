@@ -6,5 +6,5 @@ public class PersonConfirmationDto
     public Guid InvitationId { get; set; }
     public Guid PersonId { get; set; }
     public bool Confirmed { get; set; }
-    public Guid SelectedDrinkId { get; set; }
+    public Guid? SelectedDrinkId { get; set; }
 }

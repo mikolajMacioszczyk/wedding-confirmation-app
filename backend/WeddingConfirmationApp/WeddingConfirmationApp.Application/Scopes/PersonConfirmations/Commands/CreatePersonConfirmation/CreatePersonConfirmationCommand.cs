@@ -8,4 +8,4 @@ public record CreatePersonConfirmationCommand(
     Guid InvitationId, 
     Guid PersonId, 
     bool Confirmed, 
-    Guid SelectedDrinkId) : IRequest<Result<PersonConfirmationDto>>;
+    Guid? SelectedDrinkId) : IRequest<Result<PersonConfirmationDto>>;
