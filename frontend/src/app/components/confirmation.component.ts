@@ -107,92 +107,130 @@ interface PersonWithConfirmation {
   styles: [`
     .confirmation-container {
       min-height: 100vh;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background:
+        linear-gradient(180deg, rgba(248, 249, 250, 0.5) 0%, rgba(233, 236, 239, 0.5) 100%),
+        url('/wedding-image.jpg') center/cover no-repeat;
+      background-attachment: fixed;
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 32px;
+    }
+
+    .confirmation-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(248, 249, 250, 0.02);
+      pointer-events: none;
     }
 
     .card {
-      background: white;
-      border-radius: 15px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-      padding: 40px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(24, 32, 111, 0.1);
+      padding: 48px;
       max-width: 800px;
       width: 100%;
+      border: 1px solid rgba(24, 32, 111, 0.08);
     }
 
     .loading {
       text-align: center;
       padding: 40px 20px;
+      color: #18206F;
     }
 
     h1 {
       text-align: center;
-      color: #333;
-      margin-bottom: 30px;
+      color: #18206F;
+      margin-bottom: 40px;
       font-size: 2.5em;
+      font-weight: 600;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      letter-spacing: -0.5px;
     }
 
     .invitation-text {
       background: #f8f9fa;
-      padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 30px;
-      border-left: 4px solid #667eea;
+      padding: 24px;
+      border-radius: 12px;
+      margin-bottom: 40px;
+      border-left: 4px solid #D4AF37;
     }
 
     .invitation-text p {
       margin: 0;
       font-size: 1.1em;
       line-height: 1.6;
-      color: #555;
+      color: #495057;
     }
 
     h3 {
-      color: #333;
-      margin-bottom: 20px;
+      color: #18206F;
+      margin-bottom: 24px;
       font-size: 1.4em;
+      font-weight: 600;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     }
 
     .person-row {
-      background: #f8f9fa;
+      background: #ffffff;
       border: 1px solid #e9ecef;
-      border-radius: 10px;
-      padding: 25px;
+      border-radius: 12px;
+      padding: 24px;
       margin-bottom: 20px;
+      transition: all 0.2s ease;
+    }
+
+    .person-row:hover {
+      border-color: #D4AF37;
+      box-shadow: 0 4px 12px rgba(24, 32, 111, 0.06);
     }
 
     .person-info h4 {
-      margin: 0 0 15px 0;
-      color: #333;
+      margin: 0 0 16px 0;
+      color: #18206F;
       font-size: 1.2em;
+      font-weight: 600;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     }
 
     .confirmation-controls {
       display: flex;
       flex-direction: column;
-      gap: 15px;
+      gap: 16px;
     }
 
     .checkbox-container {
       display: flex;
       align-items: center;
       cursor: pointer;
-      font-size: 1.1em;
+      font-size: 1rem;
       font-weight: 500;
+      color: #18206F;
+      padding: 12px 0;
+      transition: all 0.2s ease;
+    }
+
+    .checkbox-container:hover {
+      color: #D4AF37;
     }
 
     .checkbox-container input[type="checkbox"] {
-      margin-right: 10px;
-      transform: scale(1.2);
+      margin-right: 12px;
+      transform: scale(1.3);
+      accent-color: #D4AF37;
     }
 
     .drink-selection {
-      margin-left: 30px;
-      padding: 15px;
-      background: white;
+      margin-left: 24px;
+      padding: 16px;
+      background: #f8f9fa;
       border-radius: 8px;
       border: 1px solid #dee2e6;
     }
@@ -201,57 +239,63 @@ interface PersonWithConfirmation {
       display: block;
       margin-bottom: 8px;
       font-weight: 500;
-      color: #555;
+      color: #495057;
+      font-size: 0.95em;
     }
 
     .drink-selection select {
       width: 100%;
-      padding: 10px;
+      padding: 10px 12px;
       border: 1px solid #ced4da;
-      border-radius: 5px;
+      border-radius: 6px;
       font-size: 1em;
       background: white;
+      color: #495057;
+      transition: all 0.2s ease;
     }
 
     .drink-selection select:focus {
       outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
+      border-color: #D4AF37;
+      box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.15);
     }
 
     .form-actions {
       text-align: center;
-      margin-top: 30px;
+      margin-top: 40px;
     }
 
     .submit-btn {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #18206F;
       color: white;
       border: none;
-      padding: 15px 40px;
-      border-radius: 25px;
-      font-size: 1.1em;
+      padding: 14px 32px;
+      border-radius: 8px;
+      font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all 0.2s ease;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     }
 
     .submit-btn:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+      background: #D4AF37;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(24, 32, 111, 0.15);
     }
 
     .submit-btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
+      transform: none;
+      box-shadow: 0 4px 10px rgba(24, 32, 111, 0.2);
     }
-
-
 
     .no-persons {
       text-align: center;
       padding: 40px 20px;
-      color: #6c757d;
+      color: #CBCBD4;
+      font-style: italic;
     }
 
     @media (max-width: 768px) {
