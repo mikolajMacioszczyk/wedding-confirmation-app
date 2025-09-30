@@ -40,16 +40,41 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
               }
             </div>
             <div class="form-group">
-              <label for="invitationText">Treść zaproszenia:</label>
+              <label for="invitationText">Treść zaproszenia (opcjonalne):</label>
               <textarea
                 id="invitationText"
                 [(ngModel)]="invitationForm.invitationText"
                 name="invitationText"
-                placeholder="Treść zaproszenia..."
+                placeholder="Treść zaproszenia (pozostaw puste jeśli nie potrzebujesz)..."
                 rows="4"
-                required
               ></textarea>
             </div>
+            @if (editingInvitation()) {
+              <div class="form-group">
+                <div class="persons-management-inline">
+                  <div class="persons-header-inline">
+                    <label>Zaproszone osoby ({{ editingInvitation()!.persons.length || 0 }}):</label>
+                    <button
+                      type="button"
+                      (click)="managePersonsInline()"
+                      class="btn btn-link btn-sm"
+                    >
+                      Zarządzaj osobami
+                    </button>
+                  </div>
+                  @if (editingInvitation()!.persons && editingInvitation()!.persons!.length > 0) {
+                    <div class="persons-chips">
+                      @for (person of editingInvitation()!.persons!; track person.id) {
+                        <span class="person-chip-inline">{{ person.firstName }} {{ person.lastName }}</span>
+                      }
+                    </div>
+                  } @else {
+                    <p class="no-persons-inline">Brak przypisanych osób</p>
+                  }
+                </div>
+              </div>
+            }
+
             <div class="form-actions">
               <button type="submit" class="btn btn-primary" [disabled]="!isFormValid() || submitting()">
                 {{ submitting() ? 'Zapisywanie...' : (editingInvitation() ? 'Zapisz zmiany' : 'Dodaj') }}
@@ -785,6 +810,49 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
       text-decoration: underline;
     }
 
+    /* Inline person management styles */
+    .persons-management-inline {
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 16px;
+      background: #f8f9fa;
+    }
+
+    .persons-header-inline {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .persons-header-inline label {
+      margin: 0;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .persons-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .person-chip-inline {
+      background: #e7f3ff;
+      color: #0066cc;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.9em;
+      border: 1px solid #b3d9ff;
+    }
+
+    .no-persons-inline {
+      margin: 0;
+      color: #6c757d;
+      font-style: italic;
+      font-size: 0.9em;
+    }
+
 
 
     @media (max-width: 768px) {
@@ -881,8 +949,7 @@ export class AdminInvitationsComponent implements OnInit {
   }
 
   isFormValid(): boolean {
-    return this.invitationForm.publicId.trim() !== '' &&
-           this.invitationForm.invitationText.trim() !== '';
+    return this.invitationForm.publicId.trim() !== '';
   }
 
   saveInvitation() {
@@ -895,7 +962,7 @@ export class AdminInvitationsComponent implements OnInit {
       // Update existing invitation
       const command: UpdateInvitationCommand = {
         id: editingInvitationData.id,
-        invitationText: this.invitationForm.invitationText.trim()
+        invitationText: this.invitationForm.invitationText.trim() || ''
       };
 
       this.weddingApi.updateInvitation(command).subscribe({
@@ -916,7 +983,7 @@ export class AdminInvitationsComponent implements OnInit {
       // Create new invitation
       const command: CreateInvitationCommand = {
         publicId: this.invitationForm.publicId.trim(),
-        invitationText: this.invitationForm.invitationText.trim()
+        invitationText: this.invitationForm.invitationText.trim() || ''
       };
 
       this.weddingApi.createInvitation(command).subscribe({
@@ -944,6 +1011,13 @@ export class AdminInvitationsComponent implements OnInit {
   managePersons(invitation: InvitationDto) {
     this.managingInvitation.set(invitation);
     this.loadPersonsForManagement();
+  }
+
+  managePersonsInline() {
+    const editingInv = this.editingInvitation();
+    if (editingInv) {
+      this.managePersons(editingInv);
+    }
   }
 
   closePersonManagement() {
