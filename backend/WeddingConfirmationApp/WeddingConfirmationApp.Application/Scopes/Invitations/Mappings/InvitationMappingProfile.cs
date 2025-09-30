@@ -12,6 +12,7 @@ public class InvitationMappingProfile : Profile
     {
         // Domain to DTO mappings
         CreateMap<Invitation, InvitationDto>();
+        CreateMap<Invitation, InvitationWithConfirmationInformationDto>();
         
         // Command to Domain mappings
         CreateMap<CreateInvitationCommand, Invitation>();

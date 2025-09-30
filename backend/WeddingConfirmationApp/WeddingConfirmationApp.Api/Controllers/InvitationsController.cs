@@ -19,9 +19,9 @@ public class InvitationsController : BaseApiController<InvitationsController>
     {}
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<InvitationDto>>> GetAll()
+    public async Task<ActionResult<IEnumerable<InvitationWithConfirmationInformationDto>>> GetAll([FromQuery] GetAllInvitationsQuery query)
     {
-        return Ok(await _mediator.Send(new GetAllInvitationsQuery()));
+        return Ok(await _mediator.Send(query));
     }
 
     [HttpGet("{Id}")]

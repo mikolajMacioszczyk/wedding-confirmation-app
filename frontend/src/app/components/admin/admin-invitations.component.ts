@@ -5,7 +5,7 @@ import { RouterModule } from '@angular/router';
 import { WeddingApiService } from '../../services/wedding-api.service';
 import { QrCodeService } from '../../services/qr-code.service';
 import { ToastService } from '../../services/toast.service';
-import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationCommand } from '../../models/invitation.model';
+import { InvitationDto, InvitationWithConfirmationInformationDto, PersonDto, CreateInvitationCommand, UpdateInvitationCommand } from '../../models/invitation.model';
 
 @Component({
   selector: 'app-admin-invitations',
@@ -15,9 +15,22 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
     <div class="invitations-admin">
       <div class="header">
         <h1>Zaproszenia</h1>
-        <button (click)="showAddForm.set(!showAddForm())" class="btn btn-primary">
-          {{ showAddForm() ? 'Anuluj' : '+ Dodaj zaproszenie' }}
-        </button>
+        <div class="header-controls">
+          <div class="filter-section">
+            <label class="filter-label">
+              <input
+                type="checkbox"
+                [checked]="showOnlyNotConfirmed()"
+                (change)="toggleConfirmationFilter($event)"
+                class="filter-checkbox"
+              >
+              <span class="filter-text">Tylko niepotwierdzone</span>
+            </label>
+          </div>
+          <button (click)="showAddForm.set(!showAddForm())" class="btn btn-primary">
+            {{ showAddForm() ? 'Anuluj' : '+ Dodaj zaproszenie' }}
+          </button>
+        </div>
       </div>
 
       @if (showAddForm()) {
@@ -99,10 +112,15 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
             </div>
           } @else {
             <div class="invitations-grid">
-              @for (invitation of invitations(); track invitation.id) {
-                <div class="invitation-card">
+              @for (invitation of filteredInvitations(); track invitation.id) {
+                <div class="invitation-card" [class.confirmed]="invitation.haveConfirmation" [class.not-confirmed]="!invitation.haveConfirmation">
                   <div class="invitation-header">
-                    <h3>{{ invitation.publicId }}</h3>
+                    <div class="invitation-title">
+                      <h3>{{ invitation.publicId }}</h3>
+                      <span class="confirmation-badge" [class.confirmed]="invitation.haveConfirmation" [class.not-confirmed]="!invitation.haveConfirmation">
+                        {{ invitation.haveConfirmation ? '✓ Potwierdzone' : '⏳ Niepotwierdzone' }}
+                      </span>
+                    </div>
                     <div class="invitation-actions">
                       <button
                         (click)="editInvitation(invitation)"
@@ -327,6 +345,36 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
       margin: 0;
     }
 
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .filter-section {
+      display: flex;
+      align-items: center;
+    }
+
+    .filter-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 0.9em;
+      color: #495057;
+      user-select: none;
+    }
+
+    .filter-checkbox {
+      margin: 0;
+      cursor: pointer;
+    }
+
+    .filter-text {
+      font-weight: 500;
+    }
+
     .add-form {
       background: white;
       border-radius: 10px;
@@ -482,19 +530,55 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
       box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
     }
 
+    .invitation-card.confirmed {
+      border-left: 4px solid #28a745;
+    }
+
+    .invitation-card.not-confirmed {
+      border-left: 4px solid #ffc107;
+    }
+
     .invitation-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
       margin-bottom: 15px;
       padding-bottom: 10px;
       border-bottom: 1px solid #eee;
+    }
+
+    .invitation-title {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
     .invitation-header h3 {
       margin: 0;
       color: #333;
       font-size: 1.2em;
+    }
+
+    .confirmation-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.75em;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .confirmation-badge.confirmed {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .confirmation-badge.not-confirmed {
+      background-color: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
     }
 
     .invitation-text {
@@ -862,6 +946,16 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
         gap: 15px;
       }
 
+      .header-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+      }
+
+      .filter-section {
+        justify-content: center;
+      }
+
       .invitations-grid {
         grid-template-columns: 1fr;
       }
@@ -872,6 +966,14 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
         flex-direction: column;
         align-items: stretch;
         gap: 10px;
+      }
+
+      .invitation-header {
+        align-items: stretch;
+      }
+
+      .invitation-title {
+        align-items: flex-start;
       }
 
       .footer-actions {
@@ -912,7 +1014,9 @@ export class AdminInvitationsComponent implements OnInit {
   qrCodeModal = signal<InvitationDto | null>(null);
   currentQrCode = signal<string>('');
 
-  invitations = signal<InvitationDto[]>([]);
+  invitations = signal<InvitationWithConfirmationInformationDto[]>([]);
+  filteredInvitations = signal<InvitationWithConfirmationInformationDto[]>([]);
+  showOnlyNotConfirmed = signal<boolean>(false);
   allPersons = signal<PersonDto[]>([]);
 
   invitationForm = {
@@ -935,10 +1039,12 @@ export class AdminInvitationsComponent implements OnInit {
 
   loadInvitations() {
     this.loading.set(true);
+    const onlyNotConfirmed = this.showOnlyNotConfirmed() ? true : undefined;
 
-    this.weddingApi.getAllInvitations().subscribe({
+    this.weddingApi.getAllInvitations(onlyNotConfirmed).subscribe({
       next: (invitations) => {
         this.invitations.set(invitations);
+        this.updateFilteredInvitations();
         this.loading.set(false);
       },
       error: (err) => {
@@ -946,6 +1052,21 @@ export class AdminInvitationsComponent implements OnInit {
         this.loading.set(false);
       }
     });
+  }
+
+  updateFilteredInvitations() {
+    const invitations = this.invitations();
+    if (this.showOnlyNotConfirmed()) {
+      this.filteredInvitations.set(invitations.filter(inv => !inv.haveConfirmation));
+    } else {
+      this.filteredInvitations.set(invitations);
+    }
+  }
+
+  toggleConfirmationFilter(event: Event) {
+    const target = event.target as HTMLInputElement;
+    this.showOnlyNotConfirmed.set(target.checked);
+    this.updateFilteredInvitations();
   }
 
   isFormValid(): boolean {
@@ -967,11 +1088,9 @@ export class AdminInvitationsComponent implements OnInit {
 
       this.weddingApi.updateInvitation(command).subscribe({
         next: (updatedInvitation) => {
-          this.invitations.update(invitations =>
-            invitations.map(inv => inv.id === updatedInvitation.id ? updatedInvitation : inv)
-          );
           this.toastService.showSuccess('Zaproszenie zostało zaktualizowane pomyślnie');
           this.cancelForm();
+          this.loadInvitations();
           this.submitting.set(false);
         },
         error: (err) => {
@@ -988,9 +1107,9 @@ export class AdminInvitationsComponent implements OnInit {
 
       this.weddingApi.createInvitation(command).subscribe({
         next: (invitation) => {
-          this.invitations.update(invitations => [...invitations, invitation]);
           this.toastService.showSuccess('Zaproszenie zostało dodane pomyślnie');
           this.cancelForm();
+          this.loadInvitations();
           this.submitting.set(false);
         },
         error: (err) => {
@@ -1092,13 +1211,10 @@ export class AdminInvitationsComponent implements OnInit {
 
     this.weddingApi.addPersonToInvitation(managing.id, personId).subscribe({
       next: (updatedInvitation) => {
-        // Update the invitation in the list
-        this.invitations.update(invitations =>
-          invitations.map(inv => inv.id === updatedInvitation.id ? updatedInvitation : inv)
-        );
         // Update the managing invitation
         this.managingInvitation.set(updatedInvitation);
-        // Refresh available persons
+        // Refresh invitations list and available persons
+        this.loadInvitations();
         this.loadPersonsForManagement();
         this.toastService.showSuccess('Osoba została dodana do zaproszenia');
         this.assigningPersons.update(set => {
@@ -1126,13 +1242,10 @@ export class AdminInvitationsComponent implements OnInit {
 
     this.weddingApi.removePersonFromInvitation(managing.id, personId).subscribe({
       next: (updatedInvitation) => {
-        // Update the invitation in the list
-        this.invitations.update(invitations =>
-          invitations.map(inv => inv.id === updatedInvitation.id ? updatedInvitation : inv)
-        );
         // Update the managing invitation
         this.managingInvitation.set(updatedInvitation);
-        // Refresh available persons
+        // Refresh invitations list and available persons
+        this.loadInvitations();
         this.loadPersonsForManagement();
         this.toastService.showSuccess('Osoba została usunięta z zaproszenia');
         this.removingPersons.update(set => {

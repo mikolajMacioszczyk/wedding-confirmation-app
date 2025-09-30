@@ -5,6 +5,10 @@ export interface InvitationDto {
   persons: PersonDto[];
 }
 
+export interface InvitationWithConfirmationInformationDto extends InvitationDto {
+  haveConfirmation: boolean;
+}
+
 export interface PersonDto {
   id: string;
   firstName: string;

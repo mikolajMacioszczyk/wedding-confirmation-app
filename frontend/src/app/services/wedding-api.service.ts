@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   InvitationDto,
+  InvitationWithConfirmationInformationDto,
   DrinkTypeDto,
   PersonDto,
   PersonConfirmationDto,
@@ -86,8 +87,12 @@ export class WeddingApiService {
   }
 
   // Invitations Management
-  getAllInvitations(): Observable<InvitationDto[]> {
-    return this.http.get<InvitationDto[]>(`${this.baseUrl}/Invitations`);
+  getAllInvitations(onlyNotConfirmed?: boolean): Observable<InvitationWithConfirmationInformationDto[]> {
+    let params: Record<string, string> = {};
+    if (onlyNotConfirmed !== undefined) {
+      params['OnlyNotConfirmed'] = onlyNotConfirmed.toString();
+    }
+    return this.http.get<InvitationWithConfirmationInformationDto[]>(`${this.baseUrl}/Invitations`, { params });
   }
 
   getInvitationById(id: string): Observable<InvitationDto> {
