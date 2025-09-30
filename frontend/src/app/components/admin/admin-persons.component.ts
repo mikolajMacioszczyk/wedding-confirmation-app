@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { WeddingApiService } from '../../services/wedding-api.service';
+import { ErrorHandlerService } from '../../services/error-handler.service';
 import { PersonDto, CreatePersonCommand, UpdatePersonCommand } from '../../models/invitation.model';
 
 @Component({
@@ -61,11 +62,6 @@ import { PersonDto, CreatePersonCommand, UpdatePersonCommand } from '../../model
         <div class="loading">
           <p>Ładowanie osób...</p>
         </div>
-      } @else if (error()) {
-        <div class="error">
-          <p>{{ error() }}</p>
-          <button (click)="loadPersons()" class="retry-btn">Spróbuj ponownie</button>
-        </div>
       } @else {
         <div class="persons-list">
           @if (persons().length === 0) {
@@ -102,11 +98,7 @@ import { PersonDto, CreatePersonCommand, UpdatePersonCommand } from '../../model
         </div>
       }
 
-      @if (success()) {
-        <div class="success-message">
-          {{ success() }}
-        </div>
-      }
+
     </div>
   `,
   styles: [`
@@ -353,8 +345,6 @@ import { PersonDto, CreatePersonCommand, UpdatePersonCommand } from '../../model
 })
 export class AdminPersonsComponent implements OnInit {
   loading = signal<boolean>(false);
-  error = signal<string>('');
-  success = signal<string>('');
   submitting = signal<boolean>(false);
   showAddForm = signal<boolean>(false);
   deleting = signal<Set<string>>(new Set());
@@ -367,7 +357,10 @@ export class AdminPersonsComponent implements OnInit {
     lastName: ''
   };
 
-  constructor(private weddingApi: WeddingApiService) {}
+  constructor(
+    private weddingApi: WeddingApiService,
+    private errorHandler: ErrorHandlerService
+  ) {}
 
   ngOnInit() {
     this.loadPersons();
@@ -375,7 +368,6 @@ export class AdminPersonsComponent implements OnInit {
 
   loadPersons() {
     this.loading.set(true);
-    this.error.set('');
 
     this.weddingApi.getAllPersons().subscribe({
       next: (persons) => {
@@ -384,7 +376,6 @@ export class AdminPersonsComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error loading persons:', err);
-        this.error.set('Nie udało się załadować osób');
         this.loading.set(false);
       }
     });
@@ -413,13 +404,12 @@ export class AdminPersonsComponent implements OnInit {
           this.persons.update(persons =>
             persons.map(p => p.id === updatedPerson.id ? updatedPerson : p)
           );
-          this.showSuccess('Osoba została zaktualizowana pomyślnie');
+          this.errorHandler.showSuccess('Osoba została zaktualizowana pomyślnie');
           this.cancelForm();
           this.submitting.set(false);
         },
         error: (err) => {
           console.error('Error updating person:', err);
-          this.error.set('Nie udało się zaktualizować osoby');
           this.submitting.set(false);
         }
       });
@@ -433,13 +423,12 @@ export class AdminPersonsComponent implements OnInit {
       this.weddingApi.createPerson(command).subscribe({
         next: (person) => {
           this.persons.update(persons => [...persons, person]);
-          this.showSuccess('Osoba została dodana pomyślnie');
+          this.errorHandler.showSuccess('Osoba została dodana pomyślnie');
           this.cancelForm();
           this.submitting.set(false);
         },
         error: (err) => {
           console.error('Error creating person:', err);
-          this.error.set('Nie udało się dodać osoby');
           this.submitting.set(false);
         }
       });
@@ -463,7 +452,7 @@ export class AdminPersonsComponent implements OnInit {
     this.weddingApi.deletePerson(id).subscribe({
       next: () => {
         this.persons.update(persons => persons.filter(p => p.id !== id));
-        this.showSuccess('Osoba została usunięta pomyślnie');
+        this.errorHandler.showSuccess('Osoba została usunięta pomyślnie');
         this.deleting.update(set => {
           const newSet = new Set(set);
           newSet.delete(id);
@@ -472,7 +461,6 @@ export class AdminPersonsComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error deleting person:', err);
-        this.error.set('Nie udało się usunąć osoby');
         this.deleting.update(set => {
           const newSet = new Set(set);
           newSet.delete(id);
@@ -489,8 +477,5 @@ export class AdminPersonsComponent implements OnInit {
     this.personForm.lastName = '';
   }
 
-  private showSuccess(message: string) {
-    this.success.set(message);
-    setTimeout(() => this.success.set(''), 3000);
-  }
+
 }

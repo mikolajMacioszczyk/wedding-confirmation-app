@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { WeddingApiService } from '../../services/wedding-api.service';
 import { QrCodeService } from '../../services/qr-code.service';
+import { ToastService } from '../../services/toast.service';
 import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationCommand } from '../../models/invitation.model';
 
 @Component({
@@ -64,11 +65,6 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
       @if (loading()) {
         <div class="loading">
           <p>Ładowanie zaproszeń...</p>
-        </div>
-      } @else if (error()) {
-        <div class="error">
-          <p>{{ error() }}</p>
-          <button (click)="loadInvitations()" class="retry-btn">Spróbuj ponownie</button>
         </div>
       } @else {
         <div class="invitations-list">
@@ -254,11 +250,7 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
         </div>
       }
 
-      @if (success()) {
-        <div class="success-message">
-          {{ success() }}
-        </div>
-      }
+
     </div>
   `,
   styles: [`
@@ -402,7 +394,7 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
       transform: none;
     }
 
-    .loading, .error, .empty-state {
+    .loading, .empty-state {
       text-align: center;
       padding: 40px 20px;
       background: white;
@@ -410,26 +402,8 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
-    .error {
-      color: #dc3545;
-    }
-
     .empty-state {
       color: #6c757d;
-    }
-
-    .retry-btn {
-      background: #dc3545;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-
-    .retry-btn:hover {
-      background: #c82333;
     }
 
     .invitations-grid {
@@ -671,17 +645,7 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
       border-bottom: none;
     }
 
-    .success-message {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #28a745;
-      color: white;
-      padding: 15px 20px;
-      border-radius: 5px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      z-index: 1000;
-    }
+
 
     @media (max-width: 768px) {
       .header {
@@ -725,8 +689,6 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
 })
 export class AdminInvitationsComponent implements OnInit {
   loading = signal<boolean>(false);
-  error = signal<string>('');
-  success = signal<string>('');
   submitting = signal<boolean>(false);
   showAddForm = signal<boolean>(false);
   editingInvitation = signal<InvitationDto | null>(null);
@@ -754,7 +716,8 @@ export class AdminInvitationsComponent implements OnInit {
 
   constructor(
     private weddingApi: WeddingApiService,
-    private qrCodeService: QrCodeService
+    private qrCodeService: QrCodeService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit() {
@@ -763,7 +726,6 @@ export class AdminInvitationsComponent implements OnInit {
 
   loadInvitations() {
     this.loading.set(true);
-    this.error.set('');
 
     this.weddingApi.getAllInvitations().subscribe({
       next: (invitations) => {
@@ -772,7 +734,6 @@ export class AdminInvitationsComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error loading invitations:', err);
-        this.error.set('Nie udało się załadować zaproszeń');
         this.loading.set(false);
       }
     });
@@ -801,13 +762,12 @@ export class AdminInvitationsComponent implements OnInit {
           this.invitations.update(invitations =>
             invitations.map(inv => inv.id === updatedInvitation.id ? updatedInvitation : inv)
           );
-          this.showSuccess('Zaproszenie zostało zaktualizowane pomyślnie');
+          this.toastService.showSuccess('Zaproszenie zostało zaktualizowane pomyślnie');
           this.cancelForm();
           this.submitting.set(false);
         },
         error: (err) => {
           console.error('Error updating invitation:', err);
-          this.error.set('Nie udało się zaktualizować zaproszenia');
           this.submitting.set(false);
         }
       });
@@ -821,13 +781,12 @@ export class AdminInvitationsComponent implements OnInit {
       this.weddingApi.createInvitation(command).subscribe({
         next: (invitation) => {
           this.invitations.update(invitations => [...invitations, invitation]);
-          this.showSuccess('Zaproszenie zostało dodane pomyślnie');
+          this.toastService.showSuccess('Zaproszenie zostało dodane pomyślnie');
           this.cancelForm();
           this.submitting.set(false);
         },
         error: (err) => {
           console.error('Error creating invitation:', err);
-          this.error.set('Nie udało się dodać zaproszenia');
           this.submitting.set(false);
         }
       });
@@ -888,7 +847,7 @@ export class AdminInvitationsComponent implements OnInit {
         this.managingInvitation.set(updatedInvitation);
         // Refresh available persons
         this.loadPersonsForManagement();
-        this.showSuccess('Osoba została dodana do zaproszenia');
+        this.toastService.showSuccess('Osoba została dodana do zaproszenia');
         this.assigningPersons.update(set => {
           const newSet = new Set(set);
           newSet.delete(personId);
@@ -897,7 +856,6 @@ export class AdminInvitationsComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error adding person to invitation:', err);
-        this.error.set('Nie udało się dodać osoby do zaproszenia');
         this.assigningPersons.update(set => {
           const newSet = new Set(set);
           newSet.delete(personId);
@@ -923,7 +881,7 @@ export class AdminInvitationsComponent implements OnInit {
         this.managingInvitation.set(updatedInvitation);
         // Refresh available persons
         this.loadPersonsForManagement();
-        this.showSuccess('Osoba została usunięta z zaproszenia');
+        this.toastService.showSuccess('Osoba została usunięta z zaproszenia');
         this.removingPersons.update(set => {
           const newSet = new Set(set);
           newSet.delete(personId);
@@ -932,7 +890,6 @@ export class AdminInvitationsComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error removing person from invitation:', err);
-        this.error.set('Nie udało się usunąć osoby z zaproszenia');
         this.removingPersons.update(set => {
           const newSet = new Set(set);
           newSet.delete(personId);
@@ -960,7 +917,6 @@ export class AdminInvitationsComponent implements OnInit {
       this.currentQrCode.set(qrCodeDataUrl);
     } catch (error) {
       console.error('Error generating QR code:', error);
-      this.error.set('Nie udało się wygenerować kodu QR');
       this.closeQrCodeModal();
     } finally {
       this.generatingQr.update(set => {
@@ -976,10 +932,9 @@ export class AdminInvitationsComponent implements OnInit {
 
     try {
       await this.qrCodeService.downloadQrCode(invitation.publicId);
-      this.showSuccess('Kod QR został pobrany');
+      this.toastService.showSuccess('Kod QR został pobrany');
     } catch (error) {
       console.error('Error downloading QR code:', error);
-      this.error.set('Nie udało się pobrać kodu QR');
     } finally {
       this.downloadingQr.update(set => {
         const newSet = new Set(set);
@@ -1007,10 +962,9 @@ export class AdminInvitationsComponent implements OnInit {
       const url = this.getConfirmationUrl(invitation.publicId);
       try {
         await navigator.clipboard.writeText(url);
-        this.showSuccess('Link został skopiowany do schowka');
+        this.toastService.showSuccess('Link został skopiowany do schowka');
       } catch (error) {
         console.error('Error copying to clipboard:', error);
-        this.error.set('Nie udało się skopiować linku');
       }
     }
   }
@@ -1019,8 +973,5 @@ export class AdminInvitationsComponent implements OnInit {
     return this.qrCodeService.getConfirmationUrl(publicId);
   }
 
-  private showSuccess(message: string) {
-    this.success.set(message);
-    setTimeout(() => this.success.set(''), 3000);
-  }
+
 }

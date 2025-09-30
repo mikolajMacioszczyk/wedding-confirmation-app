@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { WeddingApiService } from '../../services/wedding-api.service';
+import { ErrorHandlerService } from '../../services/error-handler.service';
 import { DrinkTypeDto, CreateDrinkTypeCommand } from '../../models/invitation.model';
 
 @Component({
@@ -48,11 +49,6 @@ import { DrinkTypeDto, CreateDrinkTypeCommand } from '../../models/invitation.mo
         <div class="loading">
           <p>Ładowanie rodzajów napojów...</p>
         </div>
-      } @else if (error()) {
-        <div class="error">
-          <p>{{ error() }}</p>
-          <button (click)="loadDrinkTypes()" class="retry-btn">Spróbuj ponownie</button>
-        </div>
       } @else {
         <div class="drink-types-list">
           @if (drinkTypes().length === 0) {
@@ -83,11 +79,7 @@ import { DrinkTypeDto, CreateDrinkTypeCommand } from '../../models/invitation.mo
         </div>
       }
 
-      @if (success()) {
-        <div class="success-message">
-          {{ success() }}
-        </div>
-      }
+
     </div>
   `,
   styles: [`
@@ -313,8 +305,6 @@ import { DrinkTypeDto, CreateDrinkTypeCommand } from '../../models/invitation.mo
 })
 export class AdminDrinkTypesComponent implements OnInit {
   loading = signal<boolean>(false);
-  error = signal<string>('');
-  success = signal<string>('');
   submitting = signal<boolean>(false);
   showAddForm = signal<boolean>(false);
   deleting = signal<Set<string>>(new Set());
@@ -322,7 +312,10 @@ export class AdminDrinkTypesComponent implements OnInit {
   drinkTypes = signal<DrinkTypeDto[]>([]);
   newDrinkType = '';
 
-  constructor(private weddingApi: WeddingApiService) {}
+  constructor(
+    private weddingApi: WeddingApiService,
+    private errorHandler: ErrorHandlerService
+  ) {}
 
   ngOnInit() {
     this.loadDrinkTypes();
@@ -330,7 +323,6 @@ export class AdminDrinkTypesComponent implements OnInit {
 
   loadDrinkTypes() {
     this.loading.set(true);
-    this.error.set('');
 
     this.weddingApi.getDrinkTypes().subscribe({
       next: (drinkTypes) => {
@@ -339,7 +331,6 @@ export class AdminDrinkTypesComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error loading drink types:', err);
-        this.error.set('Nie udało się załadować rodzajów napojów');
         this.loading.set(false);
       }
     });
@@ -357,13 +348,12 @@ export class AdminDrinkTypesComponent implements OnInit {
     this.weddingApi.createDrinkType(command).subscribe({
       next: (drinkType) => {
         this.drinkTypes.update(types => [...types, drinkType]);
-        this.showSuccess('Rodzaj napoju został dodany pomyślnie');
+        this.errorHandler.showSuccess('Rodzaj napoju został dodany pomyślnie');
         this.cancelAdd();
         this.submitting.set(false);
       },
       error: (err) => {
         console.error('Error creating drink type:', err);
-        this.error.set('Nie udało się dodać rodzaju napoju');
         this.submitting.set(false);
       }
     });
@@ -379,7 +369,7 @@ export class AdminDrinkTypesComponent implements OnInit {
     this.weddingApi.deleteDrinkType(id).subscribe({
       next: () => {
         this.drinkTypes.update(types => types.filter(t => t.id !== id));
-        this.showSuccess('Rodzaj napoju został usunięty pomyślnie');
+        this.errorHandler.showSuccess('Rodzaj napoju został usunięty pomyślnie');
         this.deleting.update(set => {
           const newSet = new Set(set);
           newSet.delete(id);
@@ -388,7 +378,6 @@ export class AdminDrinkTypesComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error deleting drink type:', err);
-        this.error.set('Nie udało się usunąć rodzaju napoju');
         this.deleting.update(set => {
           const newSet = new Set(set);
           newSet.delete(id);
@@ -403,8 +392,5 @@ export class AdminDrinkTypesComponent implements OnInit {
     this.newDrinkType = '';
   }
 
-  private showSuccess(message: string) {
-    this.success.set(message);
-    setTimeout(() => this.success.set(''), 3000);
-  }
+
 }

@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { WeddingApiService } from '../../services/wedding-api.service';
+import { ErrorHandlerService } from '../../services/error-handler.service';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -56,12 +57,7 @@ import { WeddingApiService } from '../../services/wedding-api.service';
         </div>
       }
 
-      @if (error()) {
-        <div class="error">
-          <p>{{ error() }}</p>
-          <button (click)="loadData()" class="retry-btn">Spróbuj ponownie</button>
-        </div>
-      }
+
 
       <div class="quick-actions">
         <h2>Szybkie akcje</h2>
@@ -256,14 +252,16 @@ import { WeddingApiService } from '../../services/wedding-api.service';
 })
 export class AdminDashboardComponent implements OnInit {
   loading = signal<boolean>(false);
-  error = signal<string>('');
 
   totalInvitations = signal<number>(0);
   totalPersons = signal<number>(0);
   totalDrinkTypes = signal<number>(0);
   totalConfirmations = signal<number>(0);
 
-  constructor(private weddingApi: WeddingApiService) {}
+  constructor(
+    private weddingApi: WeddingApiService,
+    private errorHandler: ErrorHandlerService
+  ) {}
 
   ngOnInit() {
     this.loadData();
@@ -271,7 +269,6 @@ export class AdminDashboardComponent implements OnInit {
 
   loadData() {
     this.loading.set(true);
-    this.error.set('');
 
     Promise.all([
       this.weddingApi.getAllInvitations().toPromise(),
@@ -286,7 +283,6 @@ export class AdminDashboardComponent implements OnInit {
       this.loading.set(false);
     }).catch((err) => {
       console.error('Error loading dashboard data:', err);
-      this.error.set('Nie udało się załadować danych dashboardu');
       this.loading.set(false);
     });
   }

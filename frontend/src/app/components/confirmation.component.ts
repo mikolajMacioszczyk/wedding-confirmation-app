@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { WeddingApiService } from '../services/wedding-api.service';
+import { ErrorHandlerService } from '../services/error-handler.service';
 import {
   InvitationDto,
   DrinkTypeDto,
@@ -27,12 +28,6 @@ interface PersonWithConfirmation {
         @if (loading()) {
           <div class="loading">
             <p>Ładowanie zaproszenia...</p>
-          </div>
-        } @else if (error()) {
-          <div class="error">
-            <h2>Błąd</h2>
-            <p>{{ error() }}</p>
-            <button (click)="loadInvitation()" class="retry-btn">Spróbuj ponownie</button>
           </div>
         } @else if (invitation()) {
           <div class="invitation-content">
@@ -102,12 +97,7 @@ interface PersonWithConfirmation {
               </div>
             }
 
-            @if (success()) {
-              <div class="success-message">
-                <h3>Sukces!</h3>
-                <p>Potwierdzenia zostały zapisane pomyślnie.</p>
-              </div>
-            }
+
           </div>
         }
       </div>
@@ -132,27 +122,9 @@ interface PersonWithConfirmation {
       width: 100%;
     }
 
-    .loading, .error {
+    .loading {
       text-align: center;
       padding: 40px 20px;
-    }
-
-    .error {
-      color: #dc3545;
-    }
-
-    .retry-btn {
-      background: #007bff;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-top: 15px;
-    }
-
-    .retry-btn:hover {
-      background: #0056b3;
     }
 
     h1 {
@@ -273,24 +245,7 @@ interface PersonWithConfirmation {
       cursor: not-allowed;
     }
 
-    .success-message {
-      background: #d4edda;
-      color: #155724;
-      padding: 20px;
-      border-radius: 10px;
-      border: 1px solid #c3e6cb;
-      margin-top: 20px;
-      text-align: center;
-    }
 
-    .success-message h3 {
-      margin: 0 0 10px 0;
-      color: #155724;
-    }
-
-    .success-message p {
-      margin: 0;
-    }
 
     .no-persons {
       text-align: center;
@@ -324,8 +279,6 @@ export class ConfirmationComponent implements OnInit {
 
   // State signals
   loading = signal<boolean>(false);
-  error = signal<string>('');
-  success = signal<boolean>(false);
   submitting = signal<boolean>(false);
 
   // Data signals
@@ -353,7 +306,8 @@ export class ConfirmationComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private weddingApi: WeddingApiService
+    private weddingApi: WeddingApiService,
+    private errorHandler: ErrorHandlerService
   ) {}
 
   ngOnInit() {
@@ -364,14 +318,13 @@ export class ConfirmationComponent implements OnInit {
         this.loadInvitation();
         this.loadDrinkTypes();
       } else {
-        this.error.set('Brak identyfikatora zaproszenia w URL');
+        this.errorHandler.showError('Brak identyfikatora zaproszenia w URL', 'Błąd URL');
       }
     });
   }
 
   loadInvitation() {
     this.loading.set(true);
-    this.error.set('');
 
     this.weddingApi.getInvitationByPublicId(this.publicId()).subscribe({
       next: (invitation) => {
@@ -381,7 +334,6 @@ export class ConfirmationComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error loading invitation:', err);
-        this.error.set('Nie udało się załadować zaproszenia. Sprawdź poprawność identyfikatora.');
         this.loading.set(false);
       }
     });
@@ -419,8 +371,6 @@ export class ConfirmationComponent implements OnInit {
     if (!this.isFormValid() || !this.invitation()) return;
 
     this.submitting.set(true);
-    this.error.set('');
-    this.success.set(false);
 
     const invitation = this.invitation()!;
     const persons = this.personsWithConfirmations();
@@ -446,14 +396,13 @@ export class ConfirmationComponent implements OnInit {
     // Execute all requests
     Promise.all(requests.map(req => req.toPromise()))
       .then(() => {
-        this.success.set(true);
+        this.errorHandler.showSuccess('Potwierdzenia zostały zapisane pomyślnie!', 'Sukces');
         this.submitting.set(false);
         // Reload confirmations to get updated data
         this.loadPersonConfirmations(invitation.id);
       })
       .catch((err) => {
         console.error('Error saving confirmations:', err);
-        this.error.set('Nie udało się zapisać potwierdzeń. Spróbuj ponownie.');
         this.submitting.set(false);
       });
   }
