@@ -158,28 +158,60 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
                 <p>Ładowanie osób...</p>
               } @else {
                 <div class="persons-management">
-                  <h4>Dostępne osoby:</h4>
-                  @if (availablePersons().length === 0) {
-                    <p class="no-available-persons">
-                      Brak dostępnych osób.
-                      <a routerLink="/admin/persons" target="_blank">Dodaj osoby</a> najpierw.
-                    </p>
-                  } @else {
-                    <div class="available-persons">
-                      @for (person of availablePersons(); track person.id) {
-                        <div class="person-item">
-                          <span>{{ person.firstName }} {{ person.lastName }}</span>
-                          <button
-                            (click)="addPersonToInvitation(person.id)"
-                            class="btn btn-primary btn-sm"
-                            [disabled]="assigningPersons().has(person.id)"
+                  <div class="available-persons-section">
+                    <div class="section-header">
+                      <h4>Dostępne osoby:</h4>
+                      <div class="filter-toggle">
+                        <label class="toggle-label">
+                          <input
+                            type="checkbox"
+                            [checked]="filterUnassignedOnly()"
+                            (change)="toggleFilter($event)"
+                            class="toggle-checkbox"
                           >
-                            {{ assigningPersons().has(person.id) ? 'Dodawanie...' : 'Dodaj' }}
-                          </button>
-                        </div>
-                      }
+                          <span class="toggle-text">Tylko nieprzypisane</span>
+                        </label>
+                      </div>
                     </div>
-                  }
+                    @if (availablePersons().length === 0) {
+                      <div class="no-available-persons">
+                        @if (allPersons().length === 0) {
+                          <p>
+                            Brak osób w systemie.
+                            <a routerLink="/admin/persons" target="_blank">Dodaj osoby</a> najpierw.
+                          </p>
+                        } @else if (filterUnassignedOnly()) {
+                          <p>
+                            Wszystkie osoby są już przypisane do zaproszeń.
+                            <a routerLink="/admin/persons" target="_blank">Dodaj nowe osoby</a>
+                            lub <button type="button" (click)="toggleFilterOff()" class="link-button">wyłącz filtrowanie</button>.
+                          </p>
+                        } @else {
+                          <p>
+                            Brak dostępnych osób do dodania.
+                          </p>
+                        }
+                      </div>
+                    } @else {
+                      <div class="available-persons">
+                        <div class="persons-count">
+                          Dostępne: {{ availablePersons().length }} z {{ allPersons().length }} osób
+                        </div>
+                        @for (person of availablePersons(); track person.id) {
+                          <div class="person-item">
+                            <span>{{ person.firstName }} {{ person.lastName }}</span>
+                            <button
+                              (click)="addPersonToInvitation(person.id)"
+                              class="btn btn-primary btn-sm"
+                              [disabled]="assigningPersons().has(person.id)"
+                            >
+                              {{ assigningPersons().has(person.id) ? 'Dodawanie...' : 'Dodaj' }}
+                            </button>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
 
                   <h4>Osoby w zaproszeniu:</h4>
                   @if (!managingInvitation()?.persons || managingInvitation()!.persons!.length === 0) {
@@ -573,9 +605,9 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
     .modal {
       background: white;
       border-radius: 10px;
-      max-width: 600px;
+      max-width: 800px;
       width: 90vw;
-      max-height: 80vh;
+      max-height: 85vh;
       overflow-y: auto;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     }
@@ -618,15 +650,92 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
     .persons-management h4 {
       color: #333;
       margin: 20px 0 10px 0;
+      font-size: 1.1em;
     }
 
     .persons-management h4:first-child {
       margin-top: 0;
     }
 
+    .available-persons-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .filter-toggle {
+      display: flex;
+      align-items: center;
+    }
+
+    .toggle-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 0.9em;
+      color: #495057;
+    }
+
+    .toggle-checkbox {
+      margin: 0;
+      cursor: pointer;
+    }
+
+    .toggle-text {
+      user-select: none;
+    }
+
+    .filter-info {
+      margin: 0;
+      color: #6c757d;
+      font-size: 0.9em;
+      padding: 8px 12px;
+      background: #e7f3ff;
+      border-radius: 5px;
+      border-left: 3px solid #0066cc;
+    }
+
+    .filter-info-disabled {
+      background: #fff3cd;
+      border-left-color: #ffc107;
+      color: #856404;
+    }
+
+    .link-button {
+      background: none;
+      border: none;
+      color: #0066cc;
+      text-decoration: underline;
+      cursor: pointer;
+      font-size: inherit;
+      font-family: inherit;
+      padding: 0;
+    }
+
+    .link-button:hover {
+      color: #0056b3;
+    }
+
+    .persons-count {
+      font-size: 0.9em;
+      color: #495057;
+      font-weight: 500;
+      padding: 8px 0;
+      border-bottom: 1px solid #dee2e6;
+      margin-bottom: 8px;
+    }
+
     .available-persons,
     .assigned-persons {
-      max-height: 200px;
+      max-height: 50vh;
       overflow-y: auto;
       border: 1px solid #eee;
       border-radius: 5px;
@@ -637,12 +746,43 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 8px 0;
-      border-bottom: 1px solid #f0f0f0;
+      padding: 8px 12px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      border: 1px solid #dee2e6;
+      margin-bottom: 6px;
+      transition: border-color 0.2s ease;
+    }
+
+    .person-item:hover {
+      border-color: #adb5bd;
     }
 
     .person-item:last-child {
-      border-bottom: none;
+      margin-bottom: 0;
+    }
+
+    .no-available-persons {
+      color: #6c757d;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #dee2e6;
+      text-align: center;
+    }
+
+    .no-available-persons p {
+      margin: 0 0 8px 0;
+    }
+
+    .no-available-persons a {
+      color: #0066cc;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .no-available-persons a:hover {
+      text-decoration: underline;
     }
 
 
@@ -713,6 +853,7 @@ export class AdminInvitationsComponent implements OnInit {
   };
 
   availablePersons = signal<PersonDto[]>([]);
+  filterUnassignedOnly = signal<boolean>(true); // Default to filtering enabled
 
   constructor(
     private weddingApi: WeddingApiService,
@@ -817,9 +958,34 @@ export class AdminInvitationsComponent implements OnInit {
       next: (persons) => {
         const managing = this.managingInvitation();
         if (managing) {
-          const assignedPersonIds = new Set(managing.persons?.map(p => p.id) || []);
-          const available = persons.filter(p => !assignedPersonIds.has(p.id));
-          this.availablePersons.set(available);
+          const currentInvitationPersonIds = new Set(managing.persons?.map(p => p.id) || []);
+
+          if (this.filterUnassignedOnly()) {
+            // Apply filtering: show only unassigned persons
+            const allAssignedPersonIds = new Set<string>();
+
+            // Collect person IDs from all invitations
+            this.invitations().forEach(invitation => {
+              invitation.persons?.forEach(person => {
+                allAssignedPersonIds.add(person.id);
+              });
+            });
+
+            // Filter out persons who are already assigned to any invitation
+            // BUT keep persons who are assigned to the current invitation being managed
+            const available = persons.filter(person => {
+              // Include if not assigned to any invitation OR assigned to current invitation
+              return !allAssignedPersonIds.has(person.id) || currentInvitationPersonIds.has(person.id);
+            });
+
+            // Remove persons already in current invitation from available list
+            const finalAvailable = available.filter(person => !currentInvitationPersonIds.has(person.id));
+            this.availablePersons.set(finalAvailable);
+          } else {
+            // No filtering: show all persons except those in current invitation
+            const allAvailable = persons.filter(person => !currentInvitationPersonIds.has(person.id));
+            this.availablePersons.set(allAvailable);
+          }
         }
         this.allPersons.set(persons);
         this.loadingPersons.set(false);
@@ -829,6 +995,19 @@ export class AdminInvitationsComponent implements OnInit {
         this.loadingPersons.set(false);
       }
     });
+  }
+
+  toggleFilter(event: Event) {
+    const target = event.target as HTMLInputElement;
+    this.filterUnassignedOnly.set(target.checked);
+    // Reload persons with new filter setting
+    this.loadPersonsForManagement();
+  }
+
+  toggleFilterOff() {
+    this.filterUnassignedOnly.set(false);
+    // Reload persons with filter disabled
+    this.loadPersonsForManagement();
   }
 
   addPersonToInvitation(personId: string) {
