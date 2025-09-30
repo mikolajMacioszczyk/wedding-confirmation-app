@@ -23,6 +23,7 @@ services:
       AllowedOrigins: ${AllowedOrigins}
     ports:
       - "8081:8080"
+    restart: unless-stopped
     depends_on:
       - database
 
