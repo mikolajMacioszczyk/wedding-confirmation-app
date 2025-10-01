@@ -5,6 +5,10 @@ export interface InvitationDto {
   persons: PersonDto[];
 }
 
+export interface InvitationWithConfirmationInformationDto extends InvitationDto {
+  haveConfirmation: boolean;
+}
+
 export interface PersonDto {
   id: string;
   firstName: string;
@@ -21,6 +25,7 @@ export interface PersonConfirmationDto {
   invitationId: string;
   personId: string;
   confirmed: boolean;
+  confirmedAt: string | null;
   isValid: boolean;
   selectedDrinkId: string | null;
 }

@@ -31,10 +31,9 @@ public class AddPersonToInvitationCommandHandler : IRequestHandler<AddPersonToIn
             return new NotFound(request.PersonId, $"Not found person with id = {request.PersonId}");
         }
 
-        // Check if person is already in invitation
-        if (invitation.Persons.Any(p => p.Id == request.PersonId))
+        if (person.InvitationId.HasValue)
         {
-            return new Failure($"Person with id {request.PersonId} is already in this invitation");
+            return new Failure("The person is already associated with an invitation");
         }
 
         var invitationConfirmations = await _unitOfWork.PersonConfirmationRepository.GetByInvitationIdAsync(request.InvitationId);

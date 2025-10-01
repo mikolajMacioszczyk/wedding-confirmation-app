@@ -12,8 +12,8 @@ using WeddingConfirmationApp.Infrastructure;
 namespace WeddingConfirmationApp.Infrastructure.Migrations
 {
     [DbContext(typeof(WeddingDbContext))]
-    [Migration("20250930090359_Initial")]
-    partial class Initial
+    [Migration("20250930131640_AddConfirmationDate")]
+    partial class AddConfirmationDate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -96,13 +96,16 @@ namespace WeddingConfirmationApp.Infrastructure.Migrations
                     b.Property<bool>("Confirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<DateTime>("ConfirmedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<Guid>("InvitationId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("PersonId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("SelectedDrinkId")
+                    b.Property<Guid?>("SelectedDrinkId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
@@ -150,9 +153,11 @@ namespace WeddingConfirmationApp.Infrastructure.Migrations
 
             modelBuilder.Entity("WeddingConfirmationApp.Domain.Entities.Person", b =>
                 {
-                    b.HasOne("WeddingConfirmationApp.Domain.Entities.Invitation", null)
+                    b.HasOne("WeddingConfirmationApp.Domain.Entities.Invitation", "Invitation")
                         .WithMany("Persons")
                         .HasForeignKey("InvitationId");
+
+                    b.Navigation("Invitation");
                 });
 
             modelBuilder.Entity("WeddingConfirmationApp.Domain.Entities.PersonConfirmation", b =>
@@ -172,8 +177,7 @@ namespace WeddingConfirmationApp.Infrastructure.Migrations
                     b.HasOne("WeddingConfirmationApp.Domain.Entities.DrinkType", "SelectedDrink")
                         .WithMany()
                         .HasForeignKey("SelectedDrinkId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Invitation");
 

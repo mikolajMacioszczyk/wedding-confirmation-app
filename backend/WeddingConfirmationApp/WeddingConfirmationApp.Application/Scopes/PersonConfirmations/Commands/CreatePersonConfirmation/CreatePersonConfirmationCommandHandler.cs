@@ -67,12 +67,14 @@ public class CreatePersonConfirmationCommandHandler : IRequestHandler<CreatePers
         if (existingConfirmation is not null)
         {
             existingConfirmation.Confirmed = request.Confirmed;
+            existingConfirmation.ConfirmedAt = DateTime.UtcNow;
             existingConfirmation.SelectedDrinkId = request.SelectedDrinkId;
             return await _unitOfWork.PersonConfirmationRepository.UpdateAsync(existingConfirmation);
         }
         else
         {
             var personConfirmation = _mapper.Map<PersonConfirmation>(request);
+            personConfirmation.ConfirmedAt = DateTime.UtcNow;
             return await _unitOfWork.PersonConfirmationRepository.AddAsync(personConfirmation);
         }
     }

@@ -78,7 +78,7 @@ namespace WeddingConfirmationApp.Infrastructure.Migrations
                     InvitationId = table.Column<Guid>(type: "uuid", nullable: false),
                     PersonId = table.Column<Guid>(type: "uuid", nullable: false),
                     Confirmed = table.Column<bool>(type: "boolean", nullable: false),
-                    SelectedDrinkId = table.Column<Guid>(type: "uuid", nullable: false)
+                    SelectedDrinkId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {

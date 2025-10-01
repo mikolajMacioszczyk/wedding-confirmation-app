@@ -93,6 +93,9 @@ namespace WeddingConfirmationApp.Infrastructure.Migrations
                     b.Property<bool>("Confirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<DateTime>("ConfirmedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<Guid>("InvitationId")
                         .HasColumnType("uuid");
 
@@ -147,9 +150,11 @@ namespace WeddingConfirmationApp.Infrastructure.Migrations
 
             modelBuilder.Entity("WeddingConfirmationApp.Domain.Entities.Person", b =>
                 {
-                    b.HasOne("WeddingConfirmationApp.Domain.Entities.Invitation", null)
+                    b.HasOne("WeddingConfirmationApp.Domain.Entities.Invitation", "Invitation")
                         .WithMany("Persons")
                         .HasForeignKey("InvitationId");
+
+                    b.Navigation("Invitation");
                 });
 
             modelBuilder.Entity("WeddingConfirmationApp.Domain.Entities.PersonConfirmation", b =>

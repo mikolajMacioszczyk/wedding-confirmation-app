@@ -5,7 +5,7 @@ import { RouterModule } from '@angular/router';
 import { WeddingApiService } from '../../services/wedding-api.service';
 import { QrCodeService } from '../../services/qr-code.service';
 import { ToastService } from '../../services/toast.service';
-import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationCommand } from '../../models/invitation.model';
+import { InvitationDto, InvitationWithConfirmationInformationDto, PersonDto, CreateInvitationCommand, UpdateInvitationCommand } from '../../models/invitation.model';
 
 @Component({
   selector: 'app-admin-invitations',
@@ -15,9 +15,22 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
     <div class="invitations-admin">
       <div class="header">
         <h1>Zaproszenia</h1>
-        <button (click)="showAddForm.set(!showAddForm())" class="btn btn-primary">
-          {{ showAddForm() ? 'Anuluj' : '+ Dodaj zaproszenie' }}
-        </button>
+        <div class="header-controls">
+          <div class="filter-section">
+            <label class="filter-label">
+              <input
+                type="checkbox"
+                [checked]="showOnlyNotConfirmed()"
+                (change)="toggleConfirmationFilter($event)"
+                class="filter-checkbox"
+              >
+              <span class="filter-text">Tylko niepotwierdzone</span>
+            </label>
+          </div>
+          <button (click)="showAddForm.set(!showAddForm())" class="btn btn-primary">
+            {{ showAddForm() ? 'Anuluj' : '+ Dodaj zaproszenie' }}
+          </button>
+        </div>
       </div>
 
       @if (showAddForm()) {
@@ -40,16 +53,41 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
               }
             </div>
             <div class="form-group">
-              <label for="invitationText">Treść zaproszenia:</label>
+              <label for="invitationText">Treść zaproszenia (opcjonalne):</label>
               <textarea
                 id="invitationText"
                 [(ngModel)]="invitationForm.invitationText"
                 name="invitationText"
-                placeholder="Treść zaproszenia..."
+                placeholder="Treść zaproszenia (pozostaw puste jeśli nie potrzebujesz)..."
                 rows="4"
-                required
               ></textarea>
             </div>
+            @if (editingInvitation()) {
+              <div class="form-group">
+                <div class="persons-management-inline">
+                  <div class="persons-header-inline">
+                    <label>Zaproszone osoby ({{ editingInvitation()!.persons.length || 0 }}):</label>
+                    <button
+                      type="button"
+                      (click)="managePersonsInline()"
+                      class="btn btn-link btn-sm"
+                    >
+                      Zarządzaj osobami
+                    </button>
+                  </div>
+                  @if (editingInvitation()!.persons && editingInvitation()!.persons!.length > 0) {
+                    <div class="persons-chips">
+                      @for (person of editingInvitation()!.persons!; track person.id) {
+                        <span class="person-chip-inline">{{ person.firstName }} {{ person.lastName }}</span>
+                      }
+                    </div>
+                  } @else {
+                    <p class="no-persons-inline">Brak przypisanych osób</p>
+                  }
+                </div>
+              </div>
+            }
+
             <div class="form-actions">
               <button type="submit" class="btn btn-primary" [disabled]="!isFormValid() || submitting()">
                 {{ submitting() ? 'Zapisywanie...' : (editingInvitation() ? 'Zapisz zmiany' : 'Dodaj') }}
@@ -74,10 +112,15 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
             </div>
           } @else {
             <div class="invitations-grid">
-              @for (invitation of invitations(); track invitation.id) {
-                <div class="invitation-card">
+              @for (invitation of filteredInvitations(); track invitation.id) {
+                <div class="invitation-card" [class.confirmed]="invitation.haveConfirmation" [class.not-confirmed]="!invitation.haveConfirmation">
                   <div class="invitation-header">
-                    <h3>{{ invitation.publicId }}</h3>
+                    <div class="invitation-title">
+                      <h3>{{ invitation.publicId }}</h3>
+                      <span class="confirmation-badge" [class.confirmed]="invitation.haveConfirmation" [class.not-confirmed]="!invitation.haveConfirmation">
+                        {{ invitation.haveConfirmation ? '✓ Potwierdzone' : '⏳ Niepotwierdzone' }}
+                      </span>
+                    </div>
                     <div class="invitation-actions">
                       <button
                         (click)="editInvitation(invitation)"
@@ -158,28 +201,60 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
                 <p>Ładowanie osób...</p>
               } @else {
                 <div class="persons-management">
-                  <h4>Dostępne osoby:</h4>
-                  @if (availablePersons().length === 0) {
-                    <p class="no-available-persons">
-                      Brak dostępnych osób.
-                      <a routerLink="/admin/persons" target="_blank">Dodaj osoby</a> najpierw.
-                    </p>
-                  } @else {
-                    <div class="available-persons">
-                      @for (person of availablePersons(); track person.id) {
-                        <div class="person-item">
-                          <span>{{ person.firstName }} {{ person.lastName }}</span>
-                          <button
-                            (click)="addPersonToInvitation(person.id)"
-                            class="btn btn-primary btn-sm"
-                            [disabled]="assigningPersons().has(person.id)"
+                  <div class="available-persons-section">
+                    <div class="section-header">
+                      <h4>Dostępne osoby:</h4>
+                      <div class="filter-toggle">
+                        <label class="toggle-label">
+                          <input
+                            type="checkbox"
+                            [checked]="filterUnassignedOnly()"
+                            (change)="toggleFilter($event)"
+                            class="toggle-checkbox"
                           >
-                            {{ assigningPersons().has(person.id) ? 'Dodawanie...' : 'Dodaj' }}
-                          </button>
-                        </div>
-                      }
+                          <span class="toggle-text">Tylko nieprzypisane</span>
+                        </label>
+                      </div>
                     </div>
-                  }
+                    @if (availablePersons().length === 0) {
+                      <div class="no-available-persons">
+                        @if (allPersons().length === 0) {
+                          <p>
+                            Brak osób w systemie.
+                            <a routerLink="/admin/persons" target="_blank">Dodaj osoby</a> najpierw.
+                          </p>
+                        } @else if (filterUnassignedOnly()) {
+                          <p>
+                            Wszystkie osoby są już przypisane do zaproszeń.
+                            <a routerLink="/admin/persons" target="_blank">Dodaj nowe osoby</a>
+                            lub <button type="button" (click)="toggleFilterOff()" class="link-button">wyłącz filtrowanie</button>.
+                          </p>
+                        } @else {
+                          <p>
+                            Brak dostępnych osób do dodania.
+                          </p>
+                        }
+                      </div>
+                    } @else {
+                      <div class="available-persons">
+                        <div class="persons-count">
+                          Dostępne: {{ availablePersons().length }} z {{ allPersons().length }} osób
+                        </div>
+                        @for (person of availablePersons(); track person.id) {
+                          <div class="person-item">
+                            <span>{{ person.firstName }} {{ person.lastName }}</span>
+                            <button
+                              (click)="addPersonToInvitation(person.id)"
+                              class="btn btn-primary btn-sm"
+                              [disabled]="assigningPersons().has(person.id)"
+                            >
+                              {{ assigningPersons().has(person.id) ? 'Dodawanie...' : 'Dodaj' }}
+                            </button>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
 
                   <h4>Osoby w zaproszeniu:</h4>
                   @if (!managingInvitation()?.persons || managingInvitation()!.persons!.length === 0) {
@@ -268,6 +343,36 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
     .header h1 {
       color: #333;
       margin: 0;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .filter-section {
+      display: flex;
+      align-items: center;
+    }
+
+    .filter-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 0.9em;
+      color: #495057;
+      user-select: none;
+    }
+
+    .filter-checkbox {
+      margin: 0;
+      cursor: pointer;
+    }
+
+    .filter-text {
+      font-weight: 500;
     }
 
     .add-form {
@@ -425,19 +530,55 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
       box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
     }
 
+    .invitation-card.confirmed {
+      border-left: 4px solid #28a745;
+    }
+
+    .invitation-card.not-confirmed {
+      border-left: 4px solid #ffc107;
+    }
+
     .invitation-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
       margin-bottom: 15px;
       padding-bottom: 10px;
       border-bottom: 1px solid #eee;
+    }
+
+    .invitation-title {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
     .invitation-header h3 {
       margin: 0;
       color: #333;
       font-size: 1.2em;
+    }
+
+    .confirmation-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.75em;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .confirmation-badge.confirmed {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .confirmation-badge.not-confirmed {
+      background-color: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
     }
 
     .invitation-text {
@@ -573,9 +714,9 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
     .modal {
       background: white;
       border-radius: 10px;
-      max-width: 600px;
+      max-width: 800px;
       width: 90vw;
-      max-height: 80vh;
+      max-height: 85vh;
       overflow-y: auto;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     }
@@ -618,15 +759,92 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
     .persons-management h4 {
       color: #333;
       margin: 20px 0 10px 0;
+      font-size: 1.1em;
     }
 
     .persons-management h4:first-child {
       margin-top: 0;
     }
 
+    .available-persons-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .filter-toggle {
+      display: flex;
+      align-items: center;
+    }
+
+    .toggle-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 0.9em;
+      color: #495057;
+    }
+
+    .toggle-checkbox {
+      margin: 0;
+      cursor: pointer;
+    }
+
+    .toggle-text {
+      user-select: none;
+    }
+
+    .filter-info {
+      margin: 0;
+      color: #6c757d;
+      font-size: 0.9em;
+      padding: 8px 12px;
+      background: #e7f3ff;
+      border-radius: 5px;
+      border-left: 3px solid #0066cc;
+    }
+
+    .filter-info-disabled {
+      background: #fff3cd;
+      border-left-color: #ffc107;
+      color: #856404;
+    }
+
+    .link-button {
+      background: none;
+      border: none;
+      color: #0066cc;
+      text-decoration: underline;
+      cursor: pointer;
+      font-size: inherit;
+      font-family: inherit;
+      padding: 0;
+    }
+
+    .link-button:hover {
+      color: #0056b3;
+    }
+
+    .persons-count {
+      font-size: 0.9em;
+      color: #495057;
+      font-weight: 500;
+      padding: 8px 0;
+      border-bottom: 1px solid #dee2e6;
+      margin-bottom: 8px;
+    }
+
     .available-persons,
     .assigned-persons {
-      max-height: 200px;
+      max-height: 50vh;
       overflow-y: auto;
       border: 1px solid #eee;
       border-radius: 5px;
@@ -637,12 +855,86 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 8px 0;
-      border-bottom: 1px solid #f0f0f0;
+      padding: 8px 12px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      border: 1px solid #dee2e6;
+      margin-bottom: 6px;
+      transition: border-color 0.2s ease;
+    }
+
+    .person-item:hover {
+      border-color: #adb5bd;
     }
 
     .person-item:last-child {
-      border-bottom: none;
+      margin-bottom: 0;
+    }
+
+    .no-available-persons {
+      color: #6c757d;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #dee2e6;
+      text-align: center;
+    }
+
+    .no-available-persons p {
+      margin: 0 0 8px 0;
+    }
+
+    .no-available-persons a {
+      color: #0066cc;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .no-available-persons a:hover {
+      text-decoration: underline;
+    }
+
+    /* Inline person management styles */
+    .persons-management-inline {
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 16px;
+      background: #f8f9fa;
+    }
+
+    .persons-header-inline {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .persons-header-inline label {
+      margin: 0;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .persons-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .person-chip-inline {
+      background: #e7f3ff;
+      color: #0066cc;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.9em;
+      border: 1px solid #b3d9ff;
+    }
+
+    .no-persons-inline {
+      margin: 0;
+      color: #6c757d;
+      font-style: italic;
+      font-size: 0.9em;
     }
 
 
@@ -652,6 +944,16 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
         flex-direction: column;
         align-items: stretch;
         gap: 15px;
+      }
+
+      .header-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+      }
+
+      .filter-section {
+        justify-content: center;
       }
 
       .invitations-grid {
@@ -664,6 +966,14 @@ import { InvitationDto, PersonDto, CreateInvitationCommand, UpdateInvitationComm
         flex-direction: column;
         align-items: stretch;
         gap: 10px;
+      }
+
+      .invitation-header {
+        align-items: stretch;
+      }
+
+      .invitation-title {
+        align-items: flex-start;
       }
 
       .footer-actions {
@@ -704,7 +1014,9 @@ export class AdminInvitationsComponent implements OnInit {
   qrCodeModal = signal<InvitationDto | null>(null);
   currentQrCode = signal<string>('');
 
-  invitations = signal<InvitationDto[]>([]);
+  invitations = signal<InvitationWithConfirmationInformationDto[]>([]);
+  filteredInvitations = signal<InvitationWithConfirmationInformationDto[]>([]);
+  showOnlyNotConfirmed = signal<boolean>(false);
   allPersons = signal<PersonDto[]>([]);
 
   invitationForm = {
@@ -713,6 +1025,7 @@ export class AdminInvitationsComponent implements OnInit {
   };
 
   availablePersons = signal<PersonDto[]>([]);
+  filterUnassignedOnly = signal<boolean>(true); // Default to filtering enabled
 
   constructor(
     private weddingApi: WeddingApiService,
@@ -726,10 +1039,12 @@ export class AdminInvitationsComponent implements OnInit {
 
   loadInvitations() {
     this.loading.set(true);
+    const onlyNotConfirmed = this.showOnlyNotConfirmed() ? true : undefined;
 
-    this.weddingApi.getAllInvitations().subscribe({
+    this.weddingApi.getAllInvitations(onlyNotConfirmed).subscribe({
       next: (invitations) => {
         this.invitations.set(invitations);
+        this.updateFilteredInvitations();
         this.loading.set(false);
       },
       error: (err) => {
@@ -739,9 +1054,23 @@ export class AdminInvitationsComponent implements OnInit {
     });
   }
 
+  updateFilteredInvitations() {
+    const invitations = this.invitations();
+    if (this.showOnlyNotConfirmed()) {
+      this.filteredInvitations.set(invitations.filter(inv => !inv.haveConfirmation));
+    } else {
+      this.filteredInvitations.set(invitations);
+    }
+  }
+
+  toggleConfirmationFilter(event: Event) {
+    const target = event.target as HTMLInputElement;
+    this.showOnlyNotConfirmed.set(target.checked);
+    this.updateFilteredInvitations();
+  }
+
   isFormValid(): boolean {
-    return this.invitationForm.publicId.trim() !== '' &&
-           this.invitationForm.invitationText.trim() !== '';
+    return this.invitationForm.publicId.trim() !== '';
   }
 
   saveInvitation() {
@@ -754,16 +1083,14 @@ export class AdminInvitationsComponent implements OnInit {
       // Update existing invitation
       const command: UpdateInvitationCommand = {
         id: editingInvitationData.id,
-        invitationText: this.invitationForm.invitationText.trim()
+        invitationText: this.invitationForm.invitationText.trim() || ''
       };
 
       this.weddingApi.updateInvitation(command).subscribe({
         next: (updatedInvitation) => {
-          this.invitations.update(invitations =>
-            invitations.map(inv => inv.id === updatedInvitation.id ? updatedInvitation : inv)
-          );
           this.toastService.showSuccess('Zaproszenie zostało zaktualizowane pomyślnie');
           this.cancelForm();
+          this.loadInvitations();
           this.submitting.set(false);
         },
         error: (err) => {
@@ -775,14 +1102,14 @@ export class AdminInvitationsComponent implements OnInit {
       // Create new invitation
       const command: CreateInvitationCommand = {
         publicId: this.invitationForm.publicId.trim(),
-        invitationText: this.invitationForm.invitationText.trim()
+        invitationText: this.invitationForm.invitationText.trim() || ''
       };
 
       this.weddingApi.createInvitation(command).subscribe({
         next: (invitation) => {
-          this.invitations.update(invitations => [...invitations, invitation]);
           this.toastService.showSuccess('Zaproszenie zostało dodane pomyślnie');
           this.cancelForm();
+          this.loadInvitations();
           this.submitting.set(false);
         },
         error: (err) => {
@@ -805,6 +1132,13 @@ export class AdminInvitationsComponent implements OnInit {
     this.loadPersonsForManagement();
   }
 
+  managePersonsInline() {
+    const editingInv = this.editingInvitation();
+    if (editingInv) {
+      this.managePersons(editingInv);
+    }
+  }
+
   closePersonManagement() {
     this.managingInvitation.set(null);
     this.availablePersons.set([]);
@@ -817,9 +1151,34 @@ export class AdminInvitationsComponent implements OnInit {
       next: (persons) => {
         const managing = this.managingInvitation();
         if (managing) {
-          const assignedPersonIds = new Set(managing.persons?.map(p => p.id) || []);
-          const available = persons.filter(p => !assignedPersonIds.has(p.id));
-          this.availablePersons.set(available);
+          const currentInvitationPersonIds = new Set(managing.persons?.map(p => p.id) || []);
+
+          if (this.filterUnassignedOnly()) {
+            // Apply filtering: show only unassigned persons
+            const allAssignedPersonIds = new Set<string>();
+
+            // Collect person IDs from all invitations
+            this.invitations().forEach(invitation => {
+              invitation.persons?.forEach(person => {
+                allAssignedPersonIds.add(person.id);
+              });
+            });
+
+            // Filter out persons who are already assigned to any invitation
+            // BUT keep persons who are assigned to the current invitation being managed
+            const available = persons.filter(person => {
+              // Include if not assigned to any invitation OR assigned to current invitation
+              return !allAssignedPersonIds.has(person.id) || currentInvitationPersonIds.has(person.id);
+            });
+
+            // Remove persons already in current invitation from available list
+            const finalAvailable = available.filter(person => !currentInvitationPersonIds.has(person.id));
+            this.availablePersons.set(finalAvailable);
+          } else {
+            // No filtering: show all persons except those in current invitation
+            const allAvailable = persons.filter(person => !currentInvitationPersonIds.has(person.id));
+            this.availablePersons.set(allAvailable);
+          }
         }
         this.allPersons.set(persons);
         this.loadingPersons.set(false);
@@ -831,6 +1190,19 @@ export class AdminInvitationsComponent implements OnInit {
     });
   }
 
+  toggleFilter(event: Event) {
+    const target = event.target as HTMLInputElement;
+    this.filterUnassignedOnly.set(target.checked);
+    // Reload persons with new filter setting
+    this.loadPersonsForManagement();
+  }
+
+  toggleFilterOff() {
+    this.filterUnassignedOnly.set(false);
+    // Reload persons with filter disabled
+    this.loadPersonsForManagement();
+  }
+
   addPersonToInvitation(personId: string) {
     const managing = this.managingInvitation();
     if (!managing) return;
@@ -839,13 +1211,10 @@ export class AdminInvitationsComponent implements OnInit {
 
     this.weddingApi.addPersonToInvitation(managing.id, personId).subscribe({
       next: (updatedInvitation) => {
-        // Update the invitation in the list
-        this.invitations.update(invitations =>
-          invitations.map(inv => inv.id === updatedInvitation.id ? updatedInvitation : inv)
-        );
         // Update the managing invitation
         this.managingInvitation.set(updatedInvitation);
-        // Refresh available persons
+        // Refresh invitations list and available persons
+        this.loadInvitations();
         this.loadPersonsForManagement();
         this.toastService.showSuccess('Osoba została dodana do zaproszenia');
         this.assigningPersons.update(set => {
@@ -873,13 +1242,10 @@ export class AdminInvitationsComponent implements OnInit {
 
     this.weddingApi.removePersonFromInvitation(managing.id, personId).subscribe({
       next: (updatedInvitation) => {
-        // Update the invitation in the list
-        this.invitations.update(invitations =>
-          invitations.map(inv => inv.id === updatedInvitation.id ? updatedInvitation : inv)
-        );
         // Update the managing invitation
         this.managingInvitation.set(updatedInvitation);
-        // Refresh available persons
+        // Refresh invitations list and available persons
+        this.loadInvitations();
         this.loadPersonsForManagement();
         this.toastService.showSuccess('Osoba została usunięta z zaproszenia');
         this.removingPersons.update(set => {
