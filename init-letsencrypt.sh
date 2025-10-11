@@ -96,19 +96,6 @@ echo "Domain: $DOMAIN"
 echo "Email: $EMAIL"
 echo "Staging: $STAGING"
 
-# Test if domain is accessible
-echo "Testing domain accessibility..."
-curl -I "http://$DOMAIN/.well-known/acme-challenge/test" || echo "Domain test failed - this is expected"
-
-# Create a test file to verify nginx is serving the challenge directory
-echo "Creating test file for validation..."
-docker compose -f docker-compose.temp.yaml exec nginx mkdir -p /var/www/certbot/.well-known/acme-challenge
-docker compose -f docker-compose.temp.yaml exec nginx sh -c 'echo "test" > /var/www/certbot/.well-known/acme-challenge/test'
-
-# Test if we can access the test file
-echo "Testing challenge directory accessibility..."
-curl "http://$DOMAIN/.well-known/acme-challenge/test" || echo "Challenge directory test failed"
-
 # Create the certificate using the official Docker approach
 docker run -it --rm --name certbot \
     -v "$(pwd)/certbot/conf:/etc/letsencrypt" \
