@@ -61,8 +61,8 @@ cp docker-compose.yaml docker-compose.temp.yaml
 sed -i 's/nginx\.conf:/nginx.conf.temp:/' docker-compose.temp.yaml
 
 # Start services with temporary config
-docker-compose down
-docker-compose -f docker-compose.temp.yaml up -d nginx
+docker compose down
+docker compose -f docker-compose.temp.yaml up -d nginx
 
 echo "Waiting for nginx to start..."
 sleep 10
@@ -74,7 +74,7 @@ if [ "$STAGING" = "--staging" ]; then
 fi
 
 echo "Requesting SSL certificate..."
-docker-compose -f docker-compose.temp.yaml run --rm certbot \
+docker compose -f docker-compose.temp.yaml run --rm certbot \
     certonly --webroot \
     --webroot-path=/var/www/certbot \
     --email $EMAIL \
@@ -93,8 +93,8 @@ if [ $? -eq 0 ]; then
     rm -f docker-compose.temp.yaml
     
     echo "Restarting services with SSL configuration..."
-    docker-compose down
-    docker-compose up -d
+    docker compose down
+    docker compose up -d
     
     echo "Setup complete! Your site should now be available at https://$DOMAIN"
     echo "Certificate will auto-renew via the certbot container."

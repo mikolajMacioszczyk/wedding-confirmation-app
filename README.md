@@ -2,6 +2,12 @@
 
 A simple web application for wedding guests to confirm their attendance and select drink preferences. Built with .NET 8 API and Angular 20.
 
+## Prerequisites
+
+- Docker and Docker Compose V2 (docker compose command)
+- A domain name pointing to your server (for SSL)
+- Ports 80 and 443 open on your server
+
 ## Quick Start
 
 ```bash
@@ -9,9 +15,10 @@ A simple web application for wedding guests to confirm their attendance and sele
 git clone <repo-url>
 cd wedding-confirmation-app
 cp .env.example .env
+# Edit .env with your configuration
 
-# Run with Docker
-docker-compose up --build
+# Development - Run with Docker
+docker compose up --build
 ```
 
 **Development URLs:**
@@ -63,6 +70,30 @@ wedding-confirmation-app/
 - TypeScript
 - SCSS
 - Signals-based state management
+
+## SSL Certificate Setup (Production)
+
+### Automatic SSL with Let's Encrypt
+
+The `init-letsencrypt.sh` script automates SSL certificate setup:
+
+```bash
+# Test with staging environment first (recommended)
+./init-letsencrypt.sh yourdomain.com admin@yourdomain.com --staging
+
+# Once working, get production certificate
+./init-letsencrypt.sh yourdomain.com admin@yourdomain.com
+```
+
+### What the script does:
+1. Creates necessary directories for Let's Encrypt
+2. Configures nginx for domain validation
+3. Requests SSL certificate from Let's Encrypt
+4. Configures nginx with SSL
+5. Sets up automatic certificate renewal
+
+### Certificate Renewal
+Certificates automatically renew via the certbot container every 12 hours.
 
 ## Production Deployment
 
