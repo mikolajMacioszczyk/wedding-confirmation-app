@@ -71,37 +71,17 @@ wedding-confirmation-app/
 - SCSS
 - Signals-based state management
 
-## SSL Certificate Setup (Production)
-
-### Automatic SSL with Let's Encrypt
-
-The `init-letsencrypt.sh` script automates SSL certificate setup:
-
-```bash
-# Test with staging environment first (recommended)
-./init-letsencrypt.sh yourdomain.com admin@yourdomain.com --staging
-
-# Once working, get production certificate
-./init-letsencrypt.sh yourdomain.com admin@yourdomain.com
-```
-
-### What the script does:
-1. Creates necessary directories for Let's Encrypt
-2. Configures nginx for domain validation
-3. Requests SSL certificate from Let's Encrypt
-4. Configures nginx with SSL
-5. Sets up automatic certificate renewal
-
-### Certificate Renewal
-Certificates automatically renew via the certbot container every 12 hours.
-
 ## Production Deployment
 
 ### Host Configuration
 
 When deploying to production, update the following files to match your domain:
 
-#### 1. Angular Environment (`frontend/src/environments/environment.prod.ts`)
+### 1. Environment Variables for Production
+
+Create a `.env` file and set environment variables for production
+
+### 2. Angular Environment (`frontend/src/environments/environment.prod.ts`)
 ```typescript
 export const environment = {
   production: true,
@@ -110,11 +90,11 @@ export const environment = {
 };
 ```
 
-#### 2. nginx Configuration (`frontend/nginx.conf`)
+### NO ACTION NEEDED: Nginx Configuration (`frontend/nginx.conf`)
 ```nginx
 server {
     listen 80;
-    server_name yourdomain.com;  # ← Change this
+    server_name yourdomain.com;  # ← Will be updated by init-letsencrypt
     # ... rest of config
 }
 ```
@@ -127,6 +107,21 @@ Browser → nginx (port 80/443)
 └── /*     → Serve Angular App (SPA routing)
 ```
 
-### 3. Environment Variables for Production
+### SSL Certificate Setup (Production)
 
-Create a `.env` file and set environment variables for production
+The `init-letsencrypt.sh` script automates SSL certificate setup:
+
+```bash
+# Test with staging environment first (recommended)
+./init-letsencrypt.sh yourdomain.com admin@yourdomain.com --staging
+
+# Once working, get production certificate
+./init-letsencrypt.sh yourdomain.com admin@yourdomain.com
+```
+
+What the script does:
+1. Creates necessary directories for Let's Encrypt
+2. Configures nginx for domain validation
+3. Requests SSL certificate from Let's Encrypt
+4. Configures nginx with SSL
+5. Sets up automatic certificate renewal
