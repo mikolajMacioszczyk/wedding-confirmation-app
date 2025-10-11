@@ -74,12 +74,31 @@ if [ "$STAGING" = "--staging" ]; then
 fi
 
 echo "Requesting SSL certificate..."
+echo "Domain: $DOMAIN"
+echo "Email: $EMAIL"
+echo "Staging flag: $STAGING_FLAG"
+
+# Test if domain is accessible
+echo "Testing domain accessibility..."
+curl -I "http://$DOMAIN/.well-known/acme-challenge/test" || echo "Domain test failed - this is expected"
+
+# Create a test file to verify nginx is serving the challenge directory
+echo "Creating test file for validation..."
+docker compose -f docker-compose.temp.yaml exec nginx mkdir -p /var/www/certbot/.well-known/acme-challenge
+docker compose -f docker-compose.temp.yaml exec nginx sh -c 'echo "test" > /var/www/certbot/.well-known/acme-challenge/test'
+
+# Test if we can access the test file
+echo "Testing challenge directory accessibility..."
+curl "http://$DOMAIN/.well-known/acme-challenge/test" || echo "Challenge directory test failed"
+
 docker compose -f docker-compose.temp.yaml run --rm certbot \
     certonly --webroot \
     --webroot-path=/var/www/certbot \
     --email $EMAIL \
     --agree-tos \
     --no-eff-email \
+    --force-renewal \
+    --verbose \
     $STAGING_FLAG \
     -d $DOMAIN \
     -d www.$DOMAIN
