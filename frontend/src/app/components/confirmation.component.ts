@@ -31,10 +31,12 @@ interface PersonWithConfirmation {
           </div>
         } @else if (invitation()) {
           <div class="invitation-content">
-            <h1>Potwierdzenie obecności</h1>
-            <div class="invitation-text">
-              <p>{{ invitation()!.invitationText }}</p>
-            </div>
+            <h1>Potwierdź swoje zaproszenie</h1>
+            @if (invitation()!.invitationText) {
+              <div class="invitation-text">
+                <p>{{ invitation()!.invitationText }}</p>
+              </div>
+            }
 
             @if (personsWithConfirmations().length > 0) {
               <form (ngSubmit)="onSubmit()" class="confirmation-form">
@@ -47,15 +49,15 @@ interface PersonWithConfirmation {
                     </div>
 
                     <div class="confirmation-controls">
-                      <label class="checkbox-container">
+                      <label class="toggle-container">
                         <input
                           type="checkbox"
                           [(ngModel)]="personWithConf.confirmed"
                           name="confirmed_{{ personWithConf.person.id }}"
                           (change)="onConfirmationChange(personWithConf)"
                         >
-                        <span class="checkmark"></span>
-                        Będę na weselu
+                        <span class="toggle-slider"></span>
+                        {{ personWithConf.confirmed ? 'Będę na weselu' : 'Nie będę na weselu' }}
                       </label>
 
                       @if (personWithConf.confirmed) {
@@ -160,7 +162,7 @@ interface PersonWithConfirmation {
       padding: 24px;
       border-radius: 12px;
       margin-bottom: 40px;
-      border-left: 4px solid #D4AF37;
+      text-align: center;
     }
 
     .invitation-text p {
@@ -206,7 +208,7 @@ interface PersonWithConfirmation {
       gap: 16px;
     }
 
-    .checkbox-container {
+    .toggle-container {
       display: flex;
       align-items: center;
       cursor: pointer;
@@ -215,16 +217,54 @@ interface PersonWithConfirmation {
       color: #18206F;
       padding: 12px 0;
       transition: all 0.2s ease;
+      position: relative;
     }
 
-    .checkbox-container:hover {
+    .toggle-container:hover {
       color: #D4AF37;
     }
 
-    .checkbox-container input[type="checkbox"] {
+    .toggle-container input[type="checkbox"] {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+
+    .toggle-slider {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+      background-color: #ccc;
+      border-radius: 24px;
       margin-right: 12px;
-      transform: scale(1.3);
-      accent-color: #D4AF37;
+      transition: all 0.3s ease;
+    }
+
+    .toggle-slider:before {
+      content: '';
+      position: absolute;
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .toggle-container input:checked + .toggle-slider {
+      background-color: #D4AF37;
+    }
+
+    .toggle-container input:checked + .toggle-slider:before {
+      transform: translateX(26px);
+    }
+
+    .toggle-container input:focus + .toggle-slider {
+      box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.3);
     }
 
     .drink-selection {
@@ -343,7 +383,7 @@ export class ConfirmationComponent implements OnInit {
       return {
         person,
         confirmation,
-        confirmed: confirmation?.confirmed || false,
+        confirmed: confirmation?.confirmed ?? true, // Default to true if no confirmation exists
         selectedDrinkId: confirmation?.selectedDrinkId || null
       };
     });
