@@ -29,11 +29,32 @@ interface PersonWithConfirmation {
           <div class="loading">
             <p>Ładowanie zaproszenia...</p>
           </div>
+        } @else if (showConfirmationScreen()) {
+          <div class="confirmation-screen">
+            <h1>{{ confirmationStatus() === 'all-confirmed' ? 'Dziękujemy za potwierdzenie!' :
+                    confirmationStatus() === 'all-declined' ? 'Dziękujemy za informację!' :
+                    'Dziękujemy za odpowiedź!' }}</h1>
+
+            <div class="confirmation-message">
+              <p>{{ confirmationMessage() }}</p>
+            </div>
+
+            <div class="form-actions">
+              <button
+                type="button"
+                class="back-btn"
+                (click)="goBackToForm()"
+              >
+                Powrót do formularza
+              </button>
+            </div>
+          </div>
         } @else if (invitation()) {
           <div class="invitation-content">
-            <h1>Potwierdzenie obecności</h1>
-            <div class="invitation-text">
-              <p>{{ invitation()!.invitationText }}</p>
+            <h1>Potwierdź swoje zaproszenie</h1>
+
+            <div class="wedding-details">
+              <p>{{invitation()!.invitationText}}</p>
             </div>
 
             @if (personsWithConfirmations().length > 0) {
@@ -47,15 +68,15 @@ interface PersonWithConfirmation {
                     </div>
 
                     <div class="confirmation-controls">
-                      <label class="checkbox-container">
+                      <label class="toggle-container">
                         <input
                           type="checkbox"
                           [(ngModel)]="personWithConf.confirmed"
                           name="confirmed_{{ personWithConf.person.id }}"
                           (change)="onConfirmationChange(personWithConf)"
                         >
-                        <span class="checkmark"></span>
-                        Będę na weselu
+                        <span class="toggle-slider"></span>
+                        {{ personWithConf.confirmed ? 'Będę na weselu' : 'Nie będę na weselu' }}
                       </label>
 
                       @if (personWithConf.confirmed) {
@@ -148,11 +169,31 @@ interface PersonWithConfirmation {
     h1 {
       text-align: center;
       color: #18206F;
-      margin-bottom: 40px;
+      margin-bottom: 16px;
       font-size: 2.5em;
       font-weight: 600;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
       letter-spacing: -0.5px;
+    }
+
+    .wedding-details {
+      text-align: center;
+      margin-bottom: 32px;
+      padding: 0;
+    }
+
+    .wedding-details p {
+      margin: 0 40px;
+      font-size: 1.4em;
+      line-height: 1.4;
+      color: #495057;
+      font-weight: 500;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    }
+
+    .wedding-details .highlight {
+      color: #D4AF37;
+      font-weight: 600;
     }
 
     .invitation-text {
@@ -160,7 +201,7 @@ interface PersonWithConfirmation {
       padding: 24px;
       border-radius: 12px;
       margin-bottom: 40px;
-      border-left: 4px solid #D4AF37;
+      text-align: center;
     }
 
     .invitation-text p {
@@ -206,7 +247,7 @@ interface PersonWithConfirmation {
       gap: 16px;
     }
 
-    .checkbox-container {
+    .toggle-container {
       display: flex;
       align-items: center;
       cursor: pointer;
@@ -215,16 +256,54 @@ interface PersonWithConfirmation {
       color: #18206F;
       padding: 12px 0;
       transition: all 0.2s ease;
+      position: relative;
     }
 
-    .checkbox-container:hover {
+    .toggle-container:hover {
       color: #D4AF37;
     }
 
-    .checkbox-container input[type="checkbox"] {
+    .toggle-container input[type="checkbox"] {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+
+    .toggle-slider {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+      background-color: #ccc;
+      border-radius: 24px;
       margin-right: 12px;
-      transform: scale(1.3);
-      accent-color: #D4AF37;
+      transition: all 0.3s ease;
+    }
+
+    .toggle-slider:before {
+      content: '';
+      position: absolute;
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .toggle-container input:checked + .toggle-slider {
+      background-color: #D4AF37;
+    }
+
+    .toggle-container input:checked + .toggle-slider:before {
+      transform: translateX(26px);
+    }
+
+    .toggle-container input:focus + .toggle-slider {
+      box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.3);
     }
 
     .drink-selection {
@@ -298,6 +377,73 @@ interface PersonWithConfirmation {
       font-style: italic;
     }
 
+    .confirmation-screen {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .confirmation-icon {
+      margin-bottom: 24px;
+    }
+
+    .icon {
+      display: inline-block;
+      width: 80px;
+      height: 80px;
+      line-height: 80px;
+      border-radius: 50%;
+      font-size: 40px;
+      font-weight: bold;
+      color: white;
+      margin: 0 auto;
+    }
+
+    .icon-check {
+      background: #28a745;
+    }
+
+    .icon-info {
+      background: #6c757d;
+    }
+
+    .icon-mixed {
+      background: #ffc107;
+      color: #212529;
+    }
+
+    .confirmation-message {
+      background: #f8f9fa;
+      padding: 24px;
+      border-radius: 12px;
+      margin: 32px 0;
+    }
+
+    .confirmation-message p {
+      margin: 0;
+      font-size: 1.1em;
+      line-height: 1.6;
+      color: #495057;
+    }
+
+    .back-btn {
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    }
+
+    .back-btn:hover {
+      background: #5a6268;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(108, 117, 125, 0.15);
+    }
+
     @media (max-width: 768px) {
       .card {
         padding: 20px;
@@ -325,6 +471,7 @@ export class ConfirmationComponent implements OnInit {
   // State signals
   loading = signal<boolean>(false);
   submitting = signal<boolean>(false);
+  showConfirmationScreen = signal<boolean>(false);
 
   // Data signals
   invitation = signal<InvitationDto | null>(null);
@@ -343,10 +490,37 @@ export class ConfirmationComponent implements OnInit {
       return {
         person,
         confirmation,
-        confirmed: confirmation?.confirmed || false,
+        confirmed: confirmation?.confirmed ?? true, // Default to true if no confirmation exists
         selectedDrinkId: confirmation?.selectedDrinkId || null
       };
     });
+  });
+
+  // Computed signal for confirmation status
+  confirmationStatus = computed(() => {
+    const persons = this.personsWithConfirmations();
+    if (persons.length === 0) return 'unknown';
+
+    const confirmedCount = persons.filter(p => p.confirmed).length;
+
+    if (confirmedCount === persons.length) return 'all-confirmed';
+    if (confirmedCount === 0) return 'all-declined';
+    return 'mixed';
+  });
+
+  // Computed signal for confirmation message
+  confirmationMessage = computed(() => {
+    const status = this.confirmationStatus();
+    switch (status) {
+      case 'all-confirmed':
+        return 'Cieszymy się, że będziecie z nami w tym wyjątkowym dniu - to dla nas naprawdę wiele znaczy. Nie możemy się doczekać wspólnego świetowania, tańców do białego rana i wszystkich pięknych chwil, które nas czekają! 💍💙';
+      case 'all-declined':
+        return 'Szkoda, że nie będzie was z nami w tym dniu, ale oczywiście rozumiemy. Mamy nadzieję, że niedługo się zobaczymy i nadrobimy to wspólnym toastem! 💙';
+      case 'mixed':
+        return 'Cieszymy się, że część z was będzie z nami w tym wyjątkowym dniu - to dla nas naprawdę wiele znaczy. Nie możemy się doczekać wspólnego świetowania, tańców do białego rana i wszystkich pięknych chwil, które nas czekają! 💍💙';
+      default:
+        return '';
+    }
   });
 
   constructor(
@@ -451,14 +625,20 @@ export class ConfirmationComponent implements OnInit {
     // Execute all requests
     Promise.all(requests.map(req => req.toPromise()))
       .then(() => {
-        this.errorHandler.showSuccess('Potwierdzenia zostały zapisane pomyślnie!', 'Sukces');
         this.submitting.set(false);
         // Reload confirmations to get updated data
         this.loadPersonConfirmations(invitation.id);
+        // Show confirmation screen
+        this.showConfirmationScreen.set(true);
       })
       .catch((err) => {
         console.error('Error saving confirmations:', err);
+        this.errorHandler.showError('Wystąpił błąd podczas zapisywania potwierdzeń', 'Błąd');
         this.submitting.set(false);
       });
+  }
+
+  goBackToForm() {
+    this.showConfirmationScreen.set(false);
   }
 }
