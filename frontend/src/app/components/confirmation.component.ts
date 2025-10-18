@@ -513,11 +513,11 @@ export class ConfirmationComponent implements OnInit {
     const status = this.confirmationStatus();
     switch (status) {
       case 'all-confirmed':
-        return 'Cieszymy się, że będziecie z nami w tym wyjątkowym dniu - to dla nas naprawdę wiele znaczy. Nie możemy się doczekać wspólnego świetowania, tańców do białego rana i wszystkich pięknych chwil, które nas czekają! 💍💙';
+        return 'Cieszymy się, że będziecie z nami w tym wyjątkowym dniu - to dla nas naprawdę wiele znaczy. Nie możemy się doczekać wspólnego świętowania, tańców do białego rana i wszystkich pięknych chwil, które nas czekają! 💍💙';
       case 'all-declined':
         return 'Szkoda, że nie będzie was z nami w tym dniu, ale oczywiście rozumiemy. Mamy nadzieję, że niedługo się zobaczymy i nadrobimy to wspólnym toastem! 💙';
       case 'mixed':
-        return 'Cieszymy się, że część z was będzie z nami w tym wyjątkowym dniu - to dla nas naprawdę wiele znaczy. Nie możemy się doczekać wspólnego świetowania, tańców do białego rana i wszystkich pięknych chwil, które nas czekają! 💍💙';
+        return 'Cieszymy się, że część z was będzie z nami w tym wyjątkowym dniu - to dla nas naprawdę wiele znaczy. Nie możemy się doczekać wspólnego świętowania, tańców do białego rana i wszystkich pięknych chwil, które nas czekają! 💍💙';
       default:
         return '';
     }
