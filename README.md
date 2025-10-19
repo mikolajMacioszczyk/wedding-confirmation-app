@@ -90,11 +90,11 @@ export const environment = {
 };
 ```
 
-### NO ACTION NEEDED: Nginx Configuration (`frontend/nginx.conf`)
+### 3. Nginx Configuration (`frontend/nginx.conf`)
 ```nginx
 server {
     listen 80;
-    server_name yourdomain.com;  # ← Will be updated by init-letsencrypt
+    server_name yourdomain.com;  # ← check domain is updated
     # ... rest of config
 }
 ```

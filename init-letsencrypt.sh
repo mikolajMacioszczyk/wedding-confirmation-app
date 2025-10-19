@@ -136,7 +136,7 @@ if [ $CERT_EXIT_CODE -eq 0 ]; then
     
     echo "Restarting services with SSL configuration..."
     docker compose down
-    docker compose up -d
+    docker compose up -d --build
     
     echo "Setup complete! Your site should now be available at https://$DOMAIN"
     echo "Certificate will auto-renew via the certbot container."
