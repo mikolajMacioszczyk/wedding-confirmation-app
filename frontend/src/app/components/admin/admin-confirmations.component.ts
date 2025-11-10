@@ -67,6 +67,9 @@ interface ConfirmationWithDetails {
                 <div class="col-person">
                   <div class="person-info">
                     <strong>{{ item.person?.firstName }} {{ item.person?.lastName }}</strong>
+                    @if (item.person?.description) {
+                      <span class="person-description">{{ item.person?.description }}</span>
+                    }
                     <small>ID: {{ item.person?.id }}</small>
                   </div>
                 </div>
@@ -253,6 +256,13 @@ interface ConfirmationWithDetails {
     .person-info strong,
     .invitation-info strong {
       color: #333;
+    }
+
+    .person-description {
+      color: #555;
+      font-size: 0.9em;
+      line-height: 1.4;
+      margin: 2px 0;
     }
 
     .person-info small,

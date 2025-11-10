@@ -46,6 +46,16 @@ import { PersonDto, CreatePersonCommand, UpdatePersonCommand } from '../../model
                 >
               </div>
             </div>
+            <div class="form-group">
+              <label for="description">Opis (opcjonalny):</label>
+              <textarea
+                id="description"
+                [(ngModel)]="personForm.description"
+                name="description"
+                placeholder="Dodatkowe informacje o osobie"
+                rows="3"
+              ></textarea>
+            </div>
             <div class="form-actions">
               <button type="submit" class="btn btn-primary" [disabled]="!isFormValid() || submitting()">
                 {{ submitting() ? 'Zapisywanie...' : (editingPerson() ? 'Zapisz zmiany' : 'Dodaj') }}
@@ -74,6 +84,9 @@ import { PersonDto, CreatePersonCommand, UpdatePersonCommand } from '../../model
                 <div class="person-card">
                   <div class="person-info">
                     <h3>{{ person.firstName }} {{ person.lastName }}</h3>
+                    @if (person.description) {
+                      <p class="person-description">{{ person.description }}</p>
+                    }
                     <p class="person-id">ID: {{ person.id }}</p>
                   </div>
                   <div class="person-actions">
@@ -155,18 +168,26 @@ import { PersonDto, CreatePersonCommand, UpdatePersonCommand } from '../../model
       color: #333;
     }
 
-    .form-group input {
+    .form-group input,
+    .form-group textarea {
       padding: 12px;
       border: 1px solid #ddd;
       border-radius: 5px;
       font-size: 16px;
       transition: border-color 0.3s ease;
+      font-family: inherit;
     }
 
-    .form-group input:focus {
+    .form-group input:focus,
+    .form-group textarea:focus {
       outline: none;
       border-color: #667eea;
       box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
     }
 
     .form-actions {
@@ -286,6 +307,13 @@ import { PersonDto, CreatePersonCommand, UpdatePersonCommand } from '../../model
       font-size: 1.2em;
     }
 
+    .person-description {
+      margin: 5px 0;
+      color: #555;
+      font-size: 0.95em;
+      line-height: 1.4;
+    }
+
     .person-id {
       margin: 0;
       color: #6c757d;
@@ -354,7 +382,8 @@ export class AdminPersonsComponent implements OnInit {
 
   personForm = {
     firstName: '',
-    lastName: ''
+    lastName: '',
+    description: ''
   };
 
   constructor(
@@ -396,7 +425,8 @@ export class AdminPersonsComponent implements OnInit {
       const command: UpdatePersonCommand = {
         id: editingPersonData.id,
         firstName: this.personForm.firstName.trim(),
-        lastName: this.personForm.lastName.trim()
+        lastName: this.personForm.lastName.trim(),
+        description: this.personForm.description.trim() || null
       };
 
       this.weddingApi.updatePerson(command).subscribe({
@@ -417,7 +447,8 @@ export class AdminPersonsComponent implements OnInit {
       // Create new person
       const command: CreatePersonCommand = {
         firstName: this.personForm.firstName.trim(),
-        lastName: this.personForm.lastName.trim()
+        lastName: this.personForm.lastName.trim(),
+        description: this.personForm.description.trim() || null
       };
 
       this.weddingApi.createPerson(command).subscribe({
@@ -439,6 +470,7 @@ export class AdminPersonsComponent implements OnInit {
     this.editingPerson.set(person);
     this.personForm.firstName = person.firstName;
     this.personForm.lastName = person.lastName;
+    this.personForm.description = person.description || '';
     this.showAddForm.set(true);
   }
 
@@ -475,6 +507,7 @@ export class AdminPersonsComponent implements OnInit {
     this.editingPerson.set(null);
     this.personForm.firstName = '';
     this.personForm.lastName = '';
+    this.personForm.description = '';
   }
 
 
