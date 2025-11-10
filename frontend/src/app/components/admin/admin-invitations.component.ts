@@ -1043,7 +1043,11 @@ export class AdminInvitationsComponent implements OnInit {
 
     this.weddingApi.getAllInvitations(onlyNotConfirmed).subscribe({
       next: (invitations) => {
-        this.invitations.set(invitations);
+        // Sort invitations by CreationDateTime (newest first)
+        const sortedInvitations = invitations.sort((a, b) =>
+          new Date(b.creationDateTime).getTime() - new Date(a.creationDateTime).getTime()
+        );
+        this.invitations.set(sortedInvitations);
         this.updateFilteredInvitations();
         this.loading.set(false);
       },
@@ -1056,11 +1060,20 @@ export class AdminInvitationsComponent implements OnInit {
 
   updateFilteredInvitations() {
     const invitations = this.invitations();
+    let filtered: InvitationWithConfirmationInformationDto[];
+
     if (this.showOnlyNotConfirmed()) {
-      this.filteredInvitations.set(invitations.filter(inv => !inv.haveConfirmation));
+      filtered = invitations.filter(inv => !inv.haveConfirmation);
     } else {
-      this.filteredInvitations.set(invitations);
+      filtered = invitations;
     }
+
+    // Sort by CreationDateTime (newest first)
+    const sorted = filtered.sort((a, b) =>
+      new Date(b.creationDateTime).getTime() - new Date(a.creationDateTime).getTime()
+    );
+
+    this.filteredInvitations.set(sorted);
   }
 
   toggleConfirmationFilter(event: Event) {

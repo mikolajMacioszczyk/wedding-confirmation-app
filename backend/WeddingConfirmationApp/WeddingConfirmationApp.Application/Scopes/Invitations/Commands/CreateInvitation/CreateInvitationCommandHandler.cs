@@ -27,6 +27,7 @@ public class CreateInvitationCommandHandler : IRequestHandler<CreateInvitationCo
         }
 
         var invitation = _mapper.Map<Invitation>(request);
+        invitation.CreationDateTime = DateTime.UtcNow;
 
         var createdInvitation = await _unitOfWork.InvitationRepository.AddAsync(invitation);
         

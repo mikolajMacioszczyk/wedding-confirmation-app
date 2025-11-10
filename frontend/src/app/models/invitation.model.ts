@@ -2,6 +2,7 @@ export interface InvitationDto {
   id: string;
   publicId: string;
   invitationText: string;
+  creationDateTime: string;
   persons: PersonDto[];
 }
 

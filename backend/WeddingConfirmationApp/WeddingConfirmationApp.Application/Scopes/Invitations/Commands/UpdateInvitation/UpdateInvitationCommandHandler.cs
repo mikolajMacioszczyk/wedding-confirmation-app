@@ -27,6 +27,7 @@ public class UpdateInvitationCommandHandler : IRequestHandler<UpdateInvitationCo
         }
 
         invitation.InvitationText = request.InvitationText;
+        invitation.CreationDateTime = DateTime.UtcNow;
         
         var updatedInvitation = await _unitOfWork.InvitationRepository.UpdateAsync(invitation);
         

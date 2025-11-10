@@ -43,6 +43,7 @@ public class AddPersonToInvitationCommandHandler : IRequestHandler<AddPersonToIn
         }
 
         invitation.Persons.Add(person);
+        invitation.CreationDateTime = DateTime.UtcNow;
         
         var (changesMade, entitiesWithErrors) = await _unitOfWork.SaveChangesAsync();
         
