@@ -7,5 +7,6 @@ public class InvitationDto
     public Guid Id { get; set; }
     public required string PublicId { get; set; }
     public required string InvitationText { get; set; }
+    public DateTime CreationDateTime { get; set; }
     public ICollection<PersonDto> Persons { get; set; } = [];
 }

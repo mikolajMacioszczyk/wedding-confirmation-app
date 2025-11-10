@@ -7,5 +7,7 @@ public class Invitation : BaseDomainEntity
 
     public required string InvitationText { get; set; }
 
+    public DateTime CreationDateTime { get; set; }
+
     public ICollection<Person> Persons { get; set; } = [];
 }

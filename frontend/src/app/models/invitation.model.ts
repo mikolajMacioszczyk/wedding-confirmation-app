@@ -2,6 +2,7 @@ export interface InvitationDto {
   id: string;
   publicId: string;
   invitationText: string;
+  creationDateTime: string;
   persons: PersonDto[];
 }
 
@@ -13,6 +14,7 @@ export interface PersonDto {
   id: string;
   firstName: string;
   lastName: string;
+  description?: string | null;
 }
 
 export interface DrinkTypeDto {
@@ -51,12 +53,14 @@ export interface CreateDrinkTypeCommand {
 export interface CreatePersonCommand {
   firstName: string;
   lastName: string;
+  description?: string | null;
 }
 
 export interface UpdatePersonCommand {
   id: string;
   firstName: string;
   lastName: string;
+  description?: string | null;
 }
 
 export interface CreateInvitationCommand {

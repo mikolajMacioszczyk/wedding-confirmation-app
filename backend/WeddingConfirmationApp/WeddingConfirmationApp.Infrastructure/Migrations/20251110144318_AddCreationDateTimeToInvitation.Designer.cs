@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WeddingConfirmationApp.Infrastructure;
@@ -11,9 +12,11 @@ using WeddingConfirmationApp.Infrastructure;
 namespace WeddingConfirmationApp.Infrastructure.Migrations
 {
     [DbContext(typeof(WeddingDbContext))]
-    partial class WeddingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251110144318_AddCreationDateTimeToInvitation")]
+    partial class AddCreationDateTimeToInvitation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -68,9 +71,6 @@ namespace WeddingConfirmationApp.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text");
 
                     b.Property<string>("FirstName")
                         .IsRequired()

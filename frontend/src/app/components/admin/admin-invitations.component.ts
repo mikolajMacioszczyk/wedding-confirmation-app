@@ -78,7 +78,12 @@ import { InvitationDto, InvitationWithConfirmationInformationDto, PersonDto, Cre
                   @if (editingInvitation()!.persons && editingInvitation()!.persons!.length > 0) {
                     <div class="persons-chips">
                       @for (person of editingInvitation()!.persons!; track person.id) {
-                        <span class="person-chip-inline">{{ person.firstName }} {{ person.lastName }}</span>
+                        <div class="person-chip-inline">
+                          <span class="person-chip-name">{{ person.firstName }} {{ person.lastName }}</span>
+                          @if (person.description) {
+                            <span class="person-chip-description">{{ person.description }}</span>
+                          }
+                        </div>
                       }
                     </div>
                   } @else {
@@ -149,7 +154,12 @@ import { InvitationDto, InvitationWithConfirmationInformationDto, PersonDto, Cre
                     @if (invitation.persons && invitation.persons.length > 0) {
                       <div class="persons-list">
                         @for (person of invitation.persons; track person.id) {
-                          <span class="person-chip">{{ person.firstName }} {{ person.lastName }}</span>
+                          <div class="person-chip">
+                            <span class="person-chip-name-main">{{ person.firstName }} {{ person.lastName }}</span>
+                            @if (person.description) {
+                              <span class="person-chip-description-main">{{ person.description }}</span>
+                            }
+                          </div>
                         }
                       </div>
                     } @else {
@@ -242,7 +252,12 @@ import { InvitationDto, InvitationWithConfirmationInformationDto, PersonDto, Cre
                         </div>
                         @for (person of availablePersons(); track person.id) {
                           <div class="person-item">
-                            <span>{{ person.firstName }} {{ person.lastName }}</span>
+                            <div class="person-details">
+                              <span class="person-name">{{ person.firstName }} {{ person.lastName }}</span>
+                              @if (person.description) {
+                                <span class="person-description">{{ person.description }}</span>
+                              }
+                            </div>
                             <button
                               (click)="addPersonToInvitation(person.id)"
                               class="btn btn-primary btn-sm"
@@ -263,7 +278,12 @@ import { InvitationDto, InvitationWithConfirmationInformationDto, PersonDto, Cre
                     <div class="assigned-persons">
                       @for (person of managingInvitation()!.persons!; track person.id) {
                         <div class="person-item">
-                          <span>{{ person.firstName }} {{ person.lastName }}</span>
+                          <div class="person-details">
+                            <span class="person-name">{{ person.firstName }} {{ person.lastName }}</span>
+                            @if (person.description) {
+                              <span class="person-description">{{ person.description }}</span>
+                            }
+                          </div>
                           <button
                             (click)="removePersonFromInvitation(person.id)"
                             class="btn btn-danger btn-sm"
@@ -615,11 +635,24 @@ import { InvitationDto, InvitationWithConfirmationInformationDto, PersonDto, Cre
     }
 
     .person-chip {
+      display: flex;
+      flex-direction: column;
       background: #667eea;
       color: white;
-      padding: 4px 8px;
+      padding: 6px 10px;
       border-radius: 12px;
       font-size: 0.85em;
+    }
+
+    .person-chip-name-main {
+      font-weight: 500;
+    }
+
+    .person-chip-description-main {
+      font-size: 0.9em;
+      opacity: 0.9;
+      margin-top: 2px;
+      line-height: 1.2;
     }
 
     .no-persons, .no-available-persons {
@@ -871,6 +904,24 @@ import { InvitationDto, InvitationWithConfirmationInformationDto, PersonDto, Cre
       margin-bottom: 0;
     }
 
+    .person-details {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .person-name {
+      font-weight: 500;
+      color: #333;
+    }
+
+    .person-description {
+      color: #6c757d;
+      font-size: 0.85em;
+      line-height: 1.3;
+    }
+
     .no-available-persons {
       color: #6c757d;
       padding: 20px;
@@ -922,12 +973,25 @@ import { InvitationDto, InvitationWithConfirmationInformationDto, PersonDto, Cre
     }
 
     .person-chip-inline {
+      display: flex;
+      flex-direction: column;
       background: #e7f3ff;
       color: #0066cc;
-      padding: 4px 8px;
+      padding: 6px 10px;
       border-radius: 4px;
-      font-size: 0.9em;
       border: 1px solid #b3d9ff;
+    }
+
+    .person-chip-name {
+      font-size: 0.9em;
+      font-weight: 500;
+    }
+
+    .person-chip-description {
+      font-size: 0.8em;
+      color: #0056b3;
+      margin-top: 2px;
+      line-height: 1.2;
     }
 
     .no-persons-inline {
@@ -1043,7 +1107,11 @@ export class AdminInvitationsComponent implements OnInit {
 
     this.weddingApi.getAllInvitations(onlyNotConfirmed).subscribe({
       next: (invitations) => {
-        this.invitations.set(invitations);
+        // Sort invitations by CreationDateTime (newest first)
+        const sortedInvitations = invitations.sort((a, b) =>
+          new Date(b.creationDateTime).getTime() - new Date(a.creationDateTime).getTime()
+        );
+        this.invitations.set(sortedInvitations);
         this.updateFilteredInvitations();
         this.loading.set(false);
       },
@@ -1056,11 +1124,20 @@ export class AdminInvitationsComponent implements OnInit {
 
   updateFilteredInvitations() {
     const invitations = this.invitations();
+    let filtered: InvitationWithConfirmationInformationDto[];
+
     if (this.showOnlyNotConfirmed()) {
-      this.filteredInvitations.set(invitations.filter(inv => !inv.haveConfirmation));
+      filtered = invitations.filter(inv => !inv.haveConfirmation);
     } else {
-      this.filteredInvitations.set(invitations);
+      filtered = invitations;
     }
+
+    // Sort by CreationDateTime (newest first)
+    const sorted = filtered.sort((a, b) =>
+      new Date(b.creationDateTime).getTime() - new Date(a.creationDateTime).getTime()
+    );
+
+    this.filteredInvitations.set(sorted);
   }
 
   toggleConfirmationFilter(event: Event) {

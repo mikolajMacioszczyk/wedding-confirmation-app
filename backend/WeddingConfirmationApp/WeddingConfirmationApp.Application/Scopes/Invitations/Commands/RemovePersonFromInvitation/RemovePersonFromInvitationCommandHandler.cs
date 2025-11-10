@@ -38,6 +38,7 @@ public class RemovePersonFromInvitationCommandHandler : IRequestHandler<RemovePe
         }
 
         invitation.Persons.Remove(personToRemove);
+        invitation.CreationDateTime = DateTime.UtcNow;
         
         var (changesMade, entitiesWithErrors) = await _unitOfWork.SaveChangesAsync();
         
