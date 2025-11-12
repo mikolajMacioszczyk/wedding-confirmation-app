@@ -15,6 +15,7 @@ export interface PersonDto {
   firstName: string;
   lastName: string;
   description?: string | null;
+  disableDrinks?: boolean;
 }
 
 export interface DrinkTypeDto {
@@ -54,6 +55,7 @@ export interface CreatePersonCommand {
   firstName: string;
   lastName: string;
   description?: string | null;
+  disableDrinks: boolean;
 }
 
 export interface UpdatePersonCommand {
@@ -61,6 +63,7 @@ export interface UpdatePersonCommand {
   firstName: string;
   lastName: string;
   description?: string | null;
+  disableDrinks: boolean;
 }
 
 export interface CreateInvitationCommand {

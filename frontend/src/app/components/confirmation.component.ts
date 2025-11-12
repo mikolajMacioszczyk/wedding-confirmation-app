@@ -80,20 +80,22 @@ interface PersonWithConfirmation {
                       </label>
 
                       @if (personWithConf.confirmed) {
-                        <div class="drink-selection">
-                          <label for="drink_{{ personWithConf.person.id }}">Jaki alkohol głównie będziesz pić?</label>
-                          <select
-                            [(ngModel)]="personWithConf.selectedDrinkId"
-                            name="drink_{{ personWithConf.person.id }}"
-                            id="drink_{{ personWithConf.person.id }}"
-                            required
-                          >
-                            <option [value]="null">-- Wybierz alkohol --</option>
-                            @for (drink of drinkTypes(); track drink.id) {
-                              <option [value]="drink.id">{{ drink.type }}</option>
-                            }
-                          </select>
-                        </div>
+                        @if (!personWithConf.person.disableDrinks) {
+                          <div class="drink-selection">
+                            <label for="drink_{{ personWithConf.person.id }}">Jaki alkohol głównie będziesz pić?</label>
+                            <select
+                              [(ngModel)]="personWithConf.selectedDrinkId"
+                              name="drink_{{ personWithConf.person.id }}"
+                              id="drink_{{ personWithConf.person.id }}"
+                              required
+                            >
+                              <option [value]="null">-- Wybierz alkohol --</option>
+                              @for (drink of drinkTypes(); track drink.id) {
+                                <option [value]="drink.id">{{ drink.type }}</option>
+                              }
+                            </select>
+                          </div>
+                        }
                       }
                     </div>
                   </div>
@@ -590,7 +592,7 @@ export class ConfirmationComponent implements OnInit {
 
   isFormValid(): boolean {
     const persons = this.personsWithConfirmations();
-    return persons.every(p => !p.confirmed || (p.confirmed && p.selectedDrinkId));
+    return persons.every(p => !p.confirmed || p.person.disableDrinks || (p.confirmed && p.selectedDrinkId));
   }
 
   onSubmit() {

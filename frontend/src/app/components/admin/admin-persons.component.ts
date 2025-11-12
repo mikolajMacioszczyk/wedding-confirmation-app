@@ -56,6 +56,16 @@ import { PersonDto, CreatePersonCommand, UpdatePersonCommand } from '../../model
                 rows="3"
               ></textarea>
             </div>
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="personForm.disableDrinks"
+                  name="disableDrinks"
+                >
+                <span>Nie wyświetlaj pytania o alkohol</span>
+              </label>
+            </div>
             <div class="form-actions">
               <button type="submit" class="btn btn-primary" [disabled]="!isFormValid() || submitting()">
                 {{ submitting() ? 'Zapisywanie...' : (editingPerson() ? 'Zapisz zmiany' : 'Dodaj') }}
@@ -188,6 +198,32 @@ import { PersonDto, CreatePersonCommand, UpdatePersonCommand } from '../../model
     .form-group textarea {
       resize: vertical;
       min-height: 80px;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      padding: 12px;
+      background: #f8f9fa;
+      border-radius: 5px;
+      transition: background-color 0.2s ease;
+    }
+
+    .checkbox-label:hover {
+      background: #e9ecef;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+
+    .checkbox-label span {
+      font-weight: 500;
+      color: #333;
     }
 
     .form-actions {
@@ -383,7 +419,8 @@ export class AdminPersonsComponent implements OnInit {
   personForm = {
     firstName: '',
     lastName: '',
-    description: ''
+    description: '',
+    disableDrinks: false
   };
 
   constructor(
@@ -426,7 +463,8 @@ export class AdminPersonsComponent implements OnInit {
         id: editingPersonData.id,
         firstName: this.personForm.firstName.trim(),
         lastName: this.personForm.lastName.trim(),
-        description: this.personForm.description.trim() || null
+        description: this.personForm.description.trim() || null,
+        disableDrinks: this.personForm.disableDrinks
       };
 
       this.weddingApi.updatePerson(command).subscribe({
@@ -448,7 +486,8 @@ export class AdminPersonsComponent implements OnInit {
       const command: CreatePersonCommand = {
         firstName: this.personForm.firstName.trim(),
         lastName: this.personForm.lastName.trim(),
-        description: this.personForm.description.trim() || null
+        description: this.personForm.description.trim() || null,
+        disableDrinks: this.personForm.disableDrinks
       };
 
       this.weddingApi.createPerson(command).subscribe({
@@ -471,6 +510,7 @@ export class AdminPersonsComponent implements OnInit {
     this.personForm.firstName = person.firstName;
     this.personForm.lastName = person.lastName;
     this.personForm.description = person.description || '';
+    this.personForm.disableDrinks = person.disableDrinks || false;
     this.showAddForm.set(true);
   }
 
@@ -508,6 +548,7 @@ export class AdminPersonsComponent implements OnInit {
     this.personForm.firstName = '';
     this.personForm.lastName = '';
     this.personForm.description = '';
+    this.personForm.disableDrinks = false;
   }
 
 

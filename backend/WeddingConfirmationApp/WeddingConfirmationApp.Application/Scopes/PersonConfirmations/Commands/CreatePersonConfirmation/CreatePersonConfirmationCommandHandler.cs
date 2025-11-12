@@ -35,17 +35,24 @@ public class CreatePersonConfirmationCommandHandler : IRequestHandler<CreatePers
         }
 
         // Check if drink type exists (only when confirmed and drink is selected)
-        if (request.Confirmed && request.SelectedDrinkId.HasValue)
+        // Skip validation if person has DisableDrinks set to true
+        if (request.Confirmed && !person.DisableDrinks)
         {
+            if (!request.SelectedDrinkId.HasValue)
+            {
+                return new Failure("SelectedDrinkId is required when Confirmed is true and drinks are not disabled for this person");
+            }
+
             var drinkType = await _unitOfWork.DrinkTypeRepository.GetByIdAsync(request.SelectedDrinkId.Value);
             if (drinkType is null)
             {
                 return new NotFound(request.SelectedDrinkId.Value, "Drink type not found");
             }
         }
-        else if (request.Confirmed && !request.SelectedDrinkId.HasValue)
+        else if (request.Confirmed && person.DisableDrinks)
         {
-            return new Failure("SelectedDrinkId is required when Confirmed is true");
+            // If drinks are disabled, clear the selected drink ID
+            request = request with { SelectedDrinkId = null };
         }
 
         var personConfirmation = await UpdateOrCreateNew(request);
