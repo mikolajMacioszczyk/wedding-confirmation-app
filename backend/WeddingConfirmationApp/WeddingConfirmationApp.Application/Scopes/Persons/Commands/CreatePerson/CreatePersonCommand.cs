@@ -9,4 +9,5 @@ public class CreatePersonCommand : IRequest<Result<PersonDto>>
     public required string FirstName { get; set; }
     public required string LastName { get; set; }
     public string? Description { get; set; }
+    public bool DisableDrinks { get; set; }
 }

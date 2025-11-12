@@ -8,6 +8,8 @@ public class Person : BaseDomainEntity
 
     public string? Description { get; set; }
 
+    public bool DisableDrinks { get; set; } = false;
+
     public Guid? InvitationId { get; set; }
     public Invitation? Invitation { get; set; }
 }

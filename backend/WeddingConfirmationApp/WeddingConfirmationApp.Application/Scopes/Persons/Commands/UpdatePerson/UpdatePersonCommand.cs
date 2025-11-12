@@ -4,4 +4,4 @@ using WeddingConfirmationApp.Application.Scopes.Persons.DTOs;
 
 namespace WeddingConfirmationApp.Application.Scopes.Persons.Commands.UpdatePerson;
 
-public record UpdatePersonCommand(Guid Id, string FirstName, string LastName, string? Description) : IRequest<Result<PersonDto>>;
+public record UpdatePersonCommand(Guid Id, string FirstName, string LastName, string? Description, bool DisableDrinks) : IRequest<Result<PersonDto>>;

@@ -25,24 +25,34 @@ public class UpdatePersonConfirmationCommandHandler : IRequestHandler<UpdatePers
             return new NotFound(request.Id);
         }
 
-        // Check if drink type exists (only when confirmed and drink is selected)
-        if (request.Confirmed && request.SelectedDrinkId.HasValue)
+        // Get the person to check if drinks are disabled
+        var person = await _unitOfWork.PersonRepository.GetByIdAsync(existingPersonConfirmation.PersonId);
+        if (person is null)
         {
+            return new NotFound(existingPersonConfirmation.PersonId, "Person not found");
+        }
+
+        // Check if drink type exists (only when confirmed and drink is selected)
+        // Skip validation if person has DisableDrinks set to true
+        if (request.Confirmed && !person.DisableDrinks)
+        {
+            if (!request.SelectedDrinkId.HasValue)
+            {
+                return new Failure("SelectedDrinkId is required when Confirmed is true and drinks are not disabled for this person");
+            }
+
             var drinkType = await _unitOfWork.DrinkTypeRepository.GetByIdAsync(request.SelectedDrinkId.Value);
             if (drinkType is null)
             {
                 return new NotFound(request.SelectedDrinkId.Value, "Drink type not found");
             }
         }
-        else if (request.Confirmed && !request.SelectedDrinkId.HasValue)
-        {
-            return new Failure("SelectedDrinkId is required when Confirmed is true");
-        }
 
         // Update properties
         existingPersonConfirmation.Confirmed = request.Confirmed;
         existingPersonConfirmation.ConfirmedAt = DateTime.UtcNow;
-        existingPersonConfirmation.SelectedDrinkId = request.SelectedDrinkId;
+        // If drinks are disabled, always set SelectedDrinkId to null
+        existingPersonConfirmation.SelectedDrinkId = person.DisableDrinks ? null : request.SelectedDrinkId;
 
         var updatedPersonConfirmation = await _unitOfWork.PersonConfirmationRepository.UpdateAsync(existingPersonConfirmation);
         
