@@ -11,8 +11,10 @@ public class InvitationMappingProfile : Profile
     public InvitationMappingProfile()
     {
         // Domain to DTO mappings
-        CreateMap<Invitation, InvitationDto>();
-        CreateMap<Invitation, InvitationWithConfirmationInformationDto>();
+        CreateMap<Invitation, InvitationDto>()
+            .ForMember(dest => dest.Persons, opt => opt.MapFrom(src => src.GetOrderedPersons()));
+        CreateMap<Invitation, InvitationWithConfirmationInformationDto>()
+            .ForMember(dest => dest.Persons, opt => opt.MapFrom(src => src.GetOrderedPersons()));
         
         // Command to Domain mappings
         CreateMap<CreateInvitationCommand, Invitation>();

@@ -7,5 +7,6 @@ public class PersonDto
     public required string LastName { get; set; }
     public string? Description { get; set; }
     public bool DisableDrinks { get; set; }
+    public int OrderInInvitation { get; set; }
     public Guid? InvitationId { get; set; }
 }

@@ -10,4 +10,6 @@ public class Invitation : BaseDomainEntity
     public DateTime CreationDateTime { get; set; }
 
     public ICollection<Person> Persons { get; set; } = [];
+    
+    public IEnumerable<Person> GetOrderedPersons() => Persons.OrderBy(p => p.OrderInInvitation);
 }
