@@ -37,7 +37,15 @@ public class RemovePersonFromInvitationCommandHandler : IRequestHandler<RemovePe
             return new Failure($"This invitation have existing confirmations, cannot modify persons list");
         }
 
+        var removedOrder = personToRemove.OrderInInvitation;
         invitation.Persons.Remove(personToRemove);
+        
+        // Reorder remaining persons - decrement order for persons with higher order values
+        foreach (var person in invitation.Persons.Where(p => p.OrderInInvitation > removedOrder))
+        {
+            person.OrderInInvitation--;
+        }
+        
         invitation.CreationDateTime = DateTime.UtcNow;
         
         var (changesMade, entitiesWithErrors) = await _unitOfWork.SaveChangesAsync();

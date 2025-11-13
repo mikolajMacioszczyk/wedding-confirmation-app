@@ -10,6 +10,8 @@ public class Person : BaseDomainEntity
 
     public bool DisableDrinks { get; set; } = false;
 
+    public int OrderInInvitation { get; set; }
+
     public Guid? InvitationId { get; set; }
     public Invitation? Invitation { get; set; }
 }

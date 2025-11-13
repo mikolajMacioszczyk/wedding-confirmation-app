@@ -42,6 +42,10 @@ public class AddPersonToInvitationCommandHandler : IRequestHandler<AddPersonToIn
             return new Failure($"This invitation have existing confirmations, cannot modify persons list");
         }
 
+        // Set the order to be the next available position
+        var maxOrder = invitation.Persons.Any() ? invitation.Persons.Max(p => p.OrderInInvitation) : -1;
+        person.OrderInInvitation = maxOrder + 1;
+        
         invitation.Persons.Add(person);
         invitation.CreationDateTime = DateTime.UtcNow;
         
