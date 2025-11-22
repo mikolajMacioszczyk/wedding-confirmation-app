@@ -26,6 +26,24 @@ import { InvitationDto, InvitationWithConfirmationInformationDto, PersonDto, Cre
               >
               <span class="filter-text">Tylko niepotwierdzone</span>
             </label>
+            <label class="filter-label">
+              <input
+                type="checkbox"
+                [checked]="showOnlyNotPrinted()"
+                (change)="togglePrintedFilter($event)"
+                class="filter-checkbox"
+              >
+              <span class="filter-text">Tylko niewydrukowane</span>
+            </label>
+            <label class="filter-label">
+              <input
+                type="checkbox"
+                [checked]="showOnlyNotGiven()"
+                (change)="toggleGivenFilter($event)"
+                class="filter-checkbox"
+              >
+              <span class="filter-text">Tylko niewydane</span>
+            </label>
           </div>
           <button (click)="showAddForm.set(!showAddForm())" class="btn btn-primary">
             {{ showAddForm() ? 'Anuluj' : '+ Dodaj zaproszenie' }}
@@ -63,6 +81,26 @@ import { InvitationDto, InvitationWithConfirmationInformationDto, PersonDto, Cre
               ></textarea>
             </div>
             @if (editingInvitation()) {
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="invitationForm.isPrinted"
+                    name="isPrinted"
+                  >
+                  <span>Wydrukowane</span>
+                </label>
+              </div>
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="invitationForm.isGiven"
+                    name="isGiven"
+                  >
+                  <span>Wydane</span>
+                </label>
+              </div>
               <div class="form-group">
                 <div class="persons-management-inline">
                   <div class="persons-header-inline">
@@ -1081,11 +1119,15 @@ export class AdminInvitationsComponent implements OnInit {
   invitations = signal<InvitationWithConfirmationInformationDto[]>([]);
   filteredInvitations = signal<InvitationWithConfirmationInformationDto[]>([]);
   showOnlyNotConfirmed = signal<boolean>(false);
+  showOnlyNotPrinted = signal<boolean>(false);
+  showOnlyNotGiven = signal<boolean>(false);
   allPersons = signal<PersonDto[]>([]);
 
   invitationForm = {
     publicId: '',
-    invitationText: ''
+    invitationText: '',
+    isPrinted: false,
+    isGiven: false
   };
 
   availablePersons = signal<PersonDto[]>([]);
@@ -1104,8 +1146,10 @@ export class AdminInvitationsComponent implements OnInit {
   loadInvitations() {
     this.loading.set(true);
     const onlyNotConfirmed = this.showOnlyNotConfirmed() ? true : undefined;
+    const onlyNotPrinted = this.showOnlyNotPrinted() ? true : undefined;
+    const onlyNotGiven = this.showOnlyNotGiven() ? true : undefined;
 
-    this.weddingApi.getAllInvitations(onlyNotConfirmed).subscribe({
+    this.weddingApi.getAllInvitations(onlyNotConfirmed, onlyNotPrinted, onlyNotGiven).subscribe({
       next: (invitations) => {
         // Sort invitations by CreationDateTime (newest first)
         const sortedInvitations = invitations.sort((a, b) =>
@@ -1124,12 +1168,18 @@ export class AdminInvitationsComponent implements OnInit {
 
   updateFilteredInvitations() {
     const invitations = this.invitations();
-    let filtered: InvitationWithConfirmationInformationDto[];
+    let filtered: InvitationWithConfirmationInformationDto[] = invitations;
 
     if (this.showOnlyNotConfirmed()) {
-      filtered = invitations.filter(inv => !inv.haveConfirmation);
-    } else {
-      filtered = invitations;
+      filtered = filtered.filter(inv => !inv.haveConfirmation);
+    }
+
+    if (this.showOnlyNotPrinted()) {
+      filtered = filtered.filter(inv => !inv.isPrinted);
+    }
+
+    if (this.showOnlyNotGiven()) {
+      filtered = filtered.filter(inv => !inv.isGiven);
     }
 
     // Sort by CreationDateTime (newest first)
@@ -1143,6 +1193,18 @@ export class AdminInvitationsComponent implements OnInit {
   toggleConfirmationFilter(event: Event) {
     const target = event.target as HTMLInputElement;
     this.showOnlyNotConfirmed.set(target.checked);
+    this.updateFilteredInvitations();
+  }
+
+  togglePrintedFilter(event: Event) {
+    const target = event.target as HTMLInputElement;
+    this.showOnlyNotPrinted.set(target.checked);
+    this.updateFilteredInvitations();
+  }
+
+  toggleGivenFilter(event: Event) {
+    const target = event.target as HTMLInputElement;
+    this.showOnlyNotGiven.set(target.checked);
     this.updateFilteredInvitations();
   }
 
@@ -1160,7 +1222,9 @@ export class AdminInvitationsComponent implements OnInit {
       // Update existing invitation
       const command: UpdateInvitationCommand = {
         id: editingInvitationData.id,
-        invitationText: this.invitationForm.invitationText.trim() || ''
+        invitationText: this.invitationForm.invitationText.trim() || '',
+        isPrinted: this.invitationForm.isPrinted,
+        isGiven: this.invitationForm.isGiven
       };
 
       this.weddingApi.updateInvitation(command).subscribe({
@@ -1201,6 +1265,8 @@ export class AdminInvitationsComponent implements OnInit {
     this.editingInvitation.set(invitation);
     this.invitationForm.publicId = invitation.publicId;
     this.invitationForm.invitationText = invitation.invitationText;
+    this.invitationForm.isPrinted = invitation.isPrinted;
+    this.invitationForm.isGiven = invitation.isGiven;
     this.showAddForm.set(true);
   }
 
@@ -1347,6 +1413,8 @@ export class AdminInvitationsComponent implements OnInit {
     this.editingInvitation.set(null);
     this.invitationForm.publicId = '';
     this.invitationForm.invitationText = '';
+    this.invitationForm.isPrinted = false;
+    this.invitationForm.isGiven = false;
   }
 
   // QR Code Methods

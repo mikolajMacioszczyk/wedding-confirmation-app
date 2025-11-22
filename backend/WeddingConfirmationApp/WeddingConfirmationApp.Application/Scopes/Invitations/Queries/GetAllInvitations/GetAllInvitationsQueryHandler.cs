@@ -30,6 +30,23 @@ public class GetAllInvitationsQueryHandler : IRequestHandler<GetAllInvitationsQu
             mappedInvitation.HaveConfirmation = confirmedInvitations.Contains(mappedInvitation.Id);
         }
 
-        return request.OnlyNotConfirmed ? mappedInvitations.Where(m => !m.HaveConfirmation) : mappedInvitations;
+        var filtered = mappedInvitations.AsEnumerable();
+
+        if (request.OnlyNotConfirmed)
+        {
+            filtered = filtered.Where(m => !m.HaveConfirmation);
+        }
+
+        if (request.OnlyNotPrinted.HasValue && request.OnlyNotPrinted.Value)
+        {
+            filtered = filtered.Where(m => !m.IsPrinted);
+        }
+
+        if (request.OnlyNotGiven.HasValue && request.OnlyNotGiven.Value)
+        {
+            filtered = filtered.Where(m => !m.IsGiven);
+        }
+
+        return filtered;
     }
 }

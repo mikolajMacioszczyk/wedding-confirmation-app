@@ -3,6 +3,8 @@ export interface InvitationDto {
   publicId: string;
   invitationText: string;
   creationDateTime: string;
+  isPrinted: boolean;
+  isGiven: boolean;
   persons: PersonDto[];
 }
 
@@ -74,4 +76,6 @@ export interface CreateInvitationCommand {
 export interface UpdateInvitationCommand {
   id: string;
   invitationText: string;
+  isPrinted: boolean;
+  isGiven: boolean;
 }
