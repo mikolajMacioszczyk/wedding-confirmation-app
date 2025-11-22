@@ -160,9 +160,17 @@ import { InvitationDto, InvitationWithConfirmationInformationDto, PersonDto, Cre
                   <div class="invitation-header">
                     <div class="invitation-title">
                       <h3>{{ invitation.publicId }}</h3>
-                      <span class="confirmation-badge" [class.confirmed]="invitation.haveConfirmation" [class.not-confirmed]="!invitation.haveConfirmation">
-                        {{ invitation.haveConfirmation ? '✓ Potwierdzone' : '⏳ Niepotwierdzone' }}
-                      </span>
+                      <div class="badges-container">
+                        <span class="confirmation-badge" [class.confirmed]="invitation.haveConfirmation" [class.not-confirmed]="!invitation.haveConfirmation">
+                          {{ invitation.haveConfirmation ? '✓ Potwierdzone' : '⏳ Niepotwierdzone' }}
+                        </span>
+                        <span class="confirmation-badge" [class.confirmed]="invitation.isPrinted" [class.not-confirmed]="!invitation.isPrinted">
+                          {{ invitation.isPrinted ? '🖨️ Wydrukowane' : '📄 Niewydrukowane' }}
+                        </span>
+                        <span class="confirmation-badge" [class.confirmed]="invitation.isGiven" [class.not-confirmed]="!invitation.isGiven">
+                          {{ invitation.isGiven ? '📬 Wydane' : '📭 Niewydane' }}
+                        </span>
+                      </div>
                     </div>
                     <div class="invitation-actions">
                       <button
@@ -615,6 +623,12 @@ import { InvitationDto, InvitationWithConfirmationInformationDto, PersonDto, Cre
       margin: 0;
       color: #333;
       font-size: 1.2em;
+    }
+
+    .badges-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
     }
 
     .confirmation-badge {
