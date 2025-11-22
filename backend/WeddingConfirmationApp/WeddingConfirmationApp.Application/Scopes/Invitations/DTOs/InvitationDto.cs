@@ -8,5 +8,7 @@ public class InvitationDto
     public required string PublicId { get; set; }
     public required string InvitationText { get; set; }
     public DateTime CreationDateTime { get; set; }
+    public bool IsPrinted { get; set; }
+    public bool IsGiven { get; set; }
     public ICollection<PersonDto> Persons { get; set; } = [];
 }

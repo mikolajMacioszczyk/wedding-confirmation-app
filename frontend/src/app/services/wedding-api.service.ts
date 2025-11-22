@@ -87,10 +87,16 @@ export class WeddingApiService {
   }
 
   // Invitations Management
-  getAllInvitations(onlyNotConfirmed?: boolean): Observable<InvitationWithConfirmationInformationDto[]> {
+  getAllInvitations(onlyNotConfirmed?: boolean, onlyNotPrinted?: boolean, onlyNotGiven?: boolean): Observable<InvitationWithConfirmationInformationDto[]> {
     let params: Record<string, string> = {};
     if (onlyNotConfirmed !== undefined) {
       params['OnlyNotConfirmed'] = onlyNotConfirmed.toString();
+    }
+    if (onlyNotPrinted !== undefined) {
+      params['OnlyNotPrinted'] = onlyNotPrinted.toString();
+    }
+    if (onlyNotGiven !== undefined) {
+      params['OnlyNotGiven'] = onlyNotGiven.toString();
     }
     return this.http.get<InvitationWithConfirmationInformationDto[]>(`${this.baseUrl}/Invitations`, { params });
   }
