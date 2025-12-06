@@ -81,19 +81,23 @@ interface PersonWithConfirmation {
 
                       @if (personWithConf.confirmed) {
                         @if (!personWithConf.person.disableDrinks) {
-                          <div class="drink-selection">
-                            <label for="drink_{{ personWithConf.person.id }}">Jaki alkohol głównie będziesz pić?</label>
+                          <div class="drink-selection" [class.error]="showDrinkError(personWithConf)">
+                            <label for="drink_{{ personWithConf.person.id }}">Jaki alkohol głównie będziesz pić? <span class="required">*</span></label>
                             <select
                               [(ngModel)]="personWithConf.selectedDrinkId"
                               name="drink_{{ personWithConf.person.id }}"
                               id="drink_{{ personWithConf.person.id }}"
                               required
+                              (change)="attemptedSubmit.set(false)"
                             >
-                              <option [value]="null">-- Wybierz alkohol --</option>
+                              <option [value]="null" [disabled]="personWithConf.selectedDrinkId !== null">-- Wybierz alkohol --</option>
                               @for (drink of drinkTypes(); track drink.id) {
                                 <option [value]="drink.id">{{ drink.type }}</option>
                               }
                             </select>
+                            @if (showDrinkError(personWithConf)) {
+                              <div class="field-error">To pole jest wymagane</div>
+                            }
                           </div>
                         }
                       }
@@ -105,7 +109,7 @@ interface PersonWithConfirmation {
                   <button
                     type="submit"
                     class="submit-btn"
-                    [disabled]="submitting() || !isFormValid()"
+                    [disabled]="submitting()"
                   >
                     @if (submitting()) {
                       Zapisywanie...
@@ -314,6 +318,19 @@ interface PersonWithConfirmation {
       background: #f8f9fa;
       border-radius: 8px;
       border: 1px solid #dee2e6;
+      transition: all 0.3s ease;
+    }
+
+    .drink-selection.error {
+      background: #fff5f5;
+      border: 2px solid #dc3545;
+      animation: shake 0.4s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
     }
 
     .drink-selection label {
@@ -322,6 +339,15 @@ interface PersonWithConfirmation {
       font-weight: 500;
       color: #495057;
       font-size: 0.95em;
+    }
+
+    .drink-selection.error label {
+      color: #dc3545;
+    }
+
+    .drink-selection label .required {
+      color: #dc3545;
+      font-weight: bold;
     }
 
     .drink-selection select {
@@ -335,10 +361,53 @@ interface PersonWithConfirmation {
       transition: all 0.2s ease;
     }
 
+    .drink-selection.error select {
+      border-color: #dc3545;
+    }
+
     .drink-selection select:focus {
       outline: none;
       border-color: #D4AF37;
       box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.15);
+    }
+
+    .drink-selection.error select:focus {
+      border-color: #dc3545;
+      box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.15);
+    }
+
+    .field-error {
+      margin-top: 8px;
+      color: #dc3545;
+      font-size: 0.875em;
+      font-weight: 500;
+    }
+
+    .validation-error {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .validation-error p {
+      margin: 0;
+      color: #856404;
+      font-weight: 500;
+      font-size: 0.95em;
     }
 
     .form-actions {
@@ -474,6 +543,7 @@ export class ConfirmationComponent implements OnInit {
   loading = signal<boolean>(false);
   submitting = signal<boolean>(false);
   showConfirmationScreen = signal<boolean>(false);
+  attemptedSubmit = signal<boolean>(false);
 
   // Data signals
   invitation = signal<InvitationDto | null>(null);
@@ -523,6 +593,12 @@ export class ConfirmationComponent implements OnInit {
       default:
         return '';
     }
+  });
+
+  // Computed signal for persons missing drink selection
+  personsWithMissingDrinks = computed<PersonWithConfirmation[]>(() => {
+    const persons = this.personsWithConfirmations();
+    return persons.filter(p => p.confirmed && !p.person.disableDrinks && !p.selectedDrinkId);
   });
 
   constructor(
@@ -596,7 +672,18 @@ export class ConfirmationComponent implements OnInit {
   }
 
   onSubmit() {
-    if (!this.isFormValid() || !this.invitation()) return;
+    this.attemptedSubmit.set(true);
+
+    if (!this.isFormValid() || !this.invitation()) {
+      // Scroll to first error
+      setTimeout(() => {
+        const firstError = document.querySelector('.drink-selection.error');
+        if (firstError) {
+          firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+      return;
+    }
 
     this.submitting.set(true);
 
@@ -642,5 +729,16 @@ export class ConfirmationComponent implements OnInit {
 
   goBackToForm() {
     this.showConfirmationScreen.set(false);
+    this.attemptedSubmit.set(false);
+  }
+
+  // Helper method to check if a person needs drink selection and hasn't selected one
+  needsDrinkSelection(personWithConf: PersonWithConfirmation): boolean {
+    return personWithConf.confirmed && !personWithConf.person.disableDrinks && !personWithConf.selectedDrinkId;
+  }
+
+  // Helper method to show error state
+  showDrinkError(personWithConf: PersonWithConfirmation): boolean {
+    return this.attemptedSubmit() && this.needsDrinkSelection(personWithConf);
   }
 }
