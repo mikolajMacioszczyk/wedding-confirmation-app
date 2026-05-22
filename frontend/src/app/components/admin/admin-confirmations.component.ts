@@ -497,12 +497,20 @@ export class AdminConfirmationsComponent implements OnInit {
   filterConfirmations() {
     const allConfirmations = this.confirmationsWithDetails();
 
+    const sortByConfirmedAtDesc = (a: ConfirmationWithDetails, b: ConfirmationWithDetails) => {
+      const dateA = a.confirmation.confirmedAt ? new Date(a.confirmation.confirmedAt).getTime() : 0;
+      const dateB = b.confirmation.confirmedAt ? new Date(b.confirmation.confirmedAt).getTime() : 0;
+      return dateB - dateA;
+    };
+
     if (this.showOnlyConfirmed) {
       this.filteredConfirmations.set(
-        allConfirmations.filter(item => item.confirmation.confirmed)
+        allConfirmations
+          .filter(item => item.confirmation.confirmed)
+          .sort(sortByConfirmedAtDesc)
       );
     } else {
-      this.filteredConfirmations.set(allConfirmations);
+      this.filteredConfirmations.set([...allConfirmations].sort(sortByConfirmedAtDesc));
     }
   }
 
