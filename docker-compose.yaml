@@ -22,6 +22,7 @@ services:
       Jwt__Key: ${JwtKey}
       Jwt__Issuer: ${JwtIssuer}
       Jwt__Audience: ${JwtAudience}
+      Confirmation__UpdatingConfirmationEnabled: ${UpdatingConfirmationEnabled}
       AllowedOrigins: ${AllowedOrigins}
     ports:
       - "8081:8080"

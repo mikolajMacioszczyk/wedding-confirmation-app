@@ -2,6 +2,7 @@ import { Component, OnInit, signal, computed } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../environments/environment';
 import { WeddingApiService } from '../services/wedding-api.service';
 import { ErrorHandlerService } from '../services/error-handler.service';
 import {
@@ -57,7 +58,15 @@ interface PersonWithConfirmation {
               <p>{{invitation()!.invitationText}}</p>
             </div>
 
-            @if (personsWithConfirmations().length > 0) {
+            @if (!confirmationEnabled) {
+              <div class="confirmation-disabled-message">
+                <p>Termin potwierdzania obecności już minął. Jeśli jednak coś się zmieniło, będziemy wdzięczni za kontakt:</p>
+                <div class="confirmation-contacts">
+                  <p><strong>{{ contactPerson1Label }}:</strong> {{ contactPerson1Phone }}</p>
+                  <p><strong>{{ contactPerson2Label }}:</strong> {{ contactPerson2Phone }}</p>
+                </div>
+              </div>
+            } @else if (personsWithConfirmations().length > 0) {
               <form (ngSubmit)="onSubmit()" class="confirmation-form">
                 <h3>Osoby zaproszone:</h3>
 
@@ -215,6 +224,39 @@ interface PersonWithConfirmation {
       font-size: 1.1em;
       line-height: 1.6;
       color: #495057;
+    }
+
+    .confirmation-disabled-message {
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .confirmation-disabled-message p {
+      margin: 0;
+      font-size: 1.1em;
+      line-height: 1.6;
+      color: #495057;
+    }
+
+    .confirmation-contacts {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid #dee2e6;
+      text-align: left;
+    }
+
+    .confirmation-contacts p {
+      margin: 8px 0 0;
+      font-size: 1em;
+      line-height: 1.5;
+      color: #495057;
+    }
+
+    .confirmation-contacts strong {
+      color: #18206F;
     }
 
     h3 {
@@ -537,6 +579,11 @@ interface PersonWithConfirmation {
   `]
 })
 export class ConfirmationComponent implements OnInit {
+  readonly confirmationEnabled = environment.updatingConfirmationEnabled;
+  readonly contactPerson1Label = environment.contactPerson1Label;
+  readonly contactPerson1Phone = environment.contactPerson1Phone;
+  readonly contactPerson2Label = environment.contactPerson2Label;
+  readonly contactPerson2Phone = environment.contactPerson2Phone;
   private publicId = signal<string>('');
 
   // State signals
