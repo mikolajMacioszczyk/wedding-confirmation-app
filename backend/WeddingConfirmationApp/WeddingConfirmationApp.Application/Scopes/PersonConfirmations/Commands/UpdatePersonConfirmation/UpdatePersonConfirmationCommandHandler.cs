@@ -1,5 +1,7 @@
 using AutoMapper;
 using MediatR;
+using Microsoft.Extensions.Options;
+using WeddingConfirmationApp.Application.Config;
 using WeddingConfirmationApp.Application.Contracts;
 using WeddingConfirmationApp.Application.Models;
 using WeddingConfirmationApp.Application.Scopes.PersonConfirmations.DTOs;
@@ -10,15 +12,25 @@ public class UpdatePersonConfirmationCommandHandler : IRequestHandler<UpdatePers
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
+    private readonly ConfirmationConfiguration _confirmationConfiguration;
 
-    public UpdatePersonConfirmationCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+    public UpdatePersonConfirmationCommandHandler(
+        IUnitOfWork unitOfWork,
+        IMapper mapper,
+        IOptions<ConfirmationConfiguration> confirmationConfigurationOptions)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
+        _confirmationConfiguration = confirmationConfigurationOptions.Value;
     }
 
     public async Task<Result<PersonConfirmationDto>> Handle(UpdatePersonConfirmationCommand request, CancellationToken cancellationToken)
     {
+        if (!_confirmationConfiguration.UpdatingConfirmationEnabled)
+        {
+            return new Failure("Updating confirmations is disabled");
+        }
+
         var existingPersonConfirmation = await _unitOfWork.PersonConfirmationRepository.GetByIdAsync(request.Id);
         if (existingPersonConfirmation is null)
         {

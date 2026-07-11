@@ -1,5 +1,7 @@
 using AutoMapper;
 using MediatR;
+using Microsoft.Extensions.Options;
+using WeddingConfirmationApp.Application.Config;
 using WeddingConfirmationApp.Application.Contracts;
 using WeddingConfirmationApp.Application.Models;
 using WeddingConfirmationApp.Application.Scopes.PersonConfirmations.DTOs;
@@ -11,15 +13,25 @@ public class CreatePersonConfirmationCommandHandler : IRequestHandler<CreatePers
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
+    private readonly ConfirmationConfiguration _confirmationConfiguration;
 
-    public CreatePersonConfirmationCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+    public CreatePersonConfirmationCommandHandler(
+        IUnitOfWork unitOfWork, 
+        IMapper mapper,
+        IOptions<ConfirmationConfiguration> confirmationConfigurationOptions)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
+        _confirmationConfiguration = confirmationConfigurationOptions.Value;
     }
 
     public async Task<Result<PersonConfirmationDto>> Handle(CreatePersonConfirmationCommand request, CancellationToken cancellationToken)
     {
+        if (!_confirmationConfiguration.UpdatingConfirmationEnabled)
+        {
+            return new Failure("Creating confirmations is disabled");
+        }
+
         // Check if invitation exists
         var invitation = await _unitOfWork.InvitationRepository.GetByIdAsync(request.InvitationId);
         if (invitation is null)

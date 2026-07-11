@@ -43,6 +43,9 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.Configure<JwtConfiguration>(
     builder.Configuration.GetSection("Jwt")
 );
+builder.Services.Configure<ConfirmationConfiguration>(
+    builder.Configuration.GetSection("Confirmation")
+);
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 // Configure JWT Authentication
